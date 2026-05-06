@@ -1,0 +1,2 @@
+import{j as s}from"./index-K14SRe4_.js";const t=()=>s.jsxs("div",{children:[s.jsx("h1",{className:"text-2xl font-bold text-slate-900 mb-6",children:"Dispatch"}),s.jsx("div",{className:"bg-white rounded-xl p-6 shadow-sm border border-slate-200",children:s.jsx("p",{className:"text-slate-500",children:"Content for dispatch page coming soon..."})})]});export{t as default};
+//# sourceMappingURL=Dispatch-G2oT5mT2.js.map
