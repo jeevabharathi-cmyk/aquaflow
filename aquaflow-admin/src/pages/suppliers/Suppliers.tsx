@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Plus, 
   Search, 
@@ -193,7 +192,11 @@ const SuppliersPage = () => {
           type="primary" 
           icon={<Plus className="w-4 h-4" />} 
           className="h-10 px-6 bg-blue-600 hover:bg-blue-700"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            console.log('Button clicked');
+            alert('Button clicked!');
+            setIsModalOpen(true);
+          }}
         >
           Add New Supplier
         </Button>
@@ -219,10 +222,11 @@ const SuppliersPage = () => {
       </Card>
 
       {/* Suppliers Table */}
-      <Card className="shadow-sm border-slate-200 overflow-hidden" bodyStyle={{ padding: 0 }}>
+      <Card className="shadow-sm border-slate-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
         <Table 
           columns={columns} 
           dataSource={mockSuppliers} 
+          rowKey="id"
           pagination={{ pageSize: 10 }}
           className="aquaflow-table"
         />

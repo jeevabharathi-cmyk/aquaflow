@@ -244,10 +244,11 @@ const ProductsPage = () => {
 
       {/* List View */}
       {viewType === 'list' && (
-        <Card className="shadow-sm border-slate-200 overflow-hidden" bodyStyle={{ padding: 0 }}>
+        <Card className="shadow-sm border-slate-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
           <Table 
             columns={columns} 
             dataSource={mockProducts} 
+            rowKey="id"
             pagination={{ pageSize: 10 }}
             className="aquaflow-table"
           />
@@ -258,7 +259,7 @@ const ProductsPage = () => {
       {viewType === 'grid' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {mockProducts.map((product) => (
-            <Card key={product.id} className="hover:shadow-md transition-all duration-300 group overflow-hidden" bodyStyle={{ padding: 0 }}>
+            <Card key={product.id} className="hover:shadow-md transition-all duration-300 group overflow-hidden" styles={{ body: { padding: 0 } }}>
               <div className="aspect-square bg-slate-100 relative overflow-hidden">
                 <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute top-3 right-3">

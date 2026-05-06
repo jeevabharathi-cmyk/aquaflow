@@ -259,7 +259,12 @@ const OrdersPage = () => {
           { title: 'Issues', value: '3', icon: AlertCircle, color: 'red' },
         ].map((s, i) => (
           <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-             <div className={`p-3 rounded-xl bg-${s.color}-50 text-${s.color}-600`}>
+             <div className={`p-3 rounded-xl ${
+               s.color === 'blue' ? 'bg-blue-50 text-blue-600' :
+               s.color === 'orange' ? 'bg-orange-50 text-orange-600' :
+               s.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+               'bg-red-50 text-red-600'
+             }`}>
                 <s.icon className="w-5 h-5" />
              </div>
              <div>
@@ -271,10 +276,11 @@ const OrdersPage = () => {
       </div>
 
       {/* Orders Table */}
-      <Card bodyStyle={{ padding: 0 }} className="shadow-sm border-slate-200 overflow-hidden">
+      <Card styles={{ body: { padding: 0 } }} className="shadow-sm border-slate-200 overflow-hidden">
         <Table 
           columns={columns} 
           dataSource={mockOrders} 
+          rowKey="id"
           pagination={{ pageSize: 10 }}
           className="aquaflow-table"
         />

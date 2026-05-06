@@ -149,7 +149,12 @@ const DashboardPage = () => {
                 <p className="text-sm font-medium text-slate-500 mb-1">{stat.title}</p>
                 <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
               </div>
-              <div className={`p-2.5 rounded-xl bg-${stat.color}-50 text-${stat.color}-600 group-hover:scale-110 transition-transform`}>
+            <div className={`p-2.5 rounded-xl transition-transform ${
+              stat.color === 'blue' ? 'bg-blue-50 text-blue-600' :
+              stat.color === 'purple' ? 'bg-purple-50 text-purple-600' :
+              stat.color === 'orange' ? 'bg-orange-50 text-orange-600' :
+              'bg-green-50 text-green-600'
+            } group-hover:scale-110`}>
                 <stat.icon className="w-5 h-5" />
               </div>
             </div>
@@ -162,7 +167,12 @@ const DashboardPage = () => {
               </span>
               <span className="text-xs text-slate-400">vs last month</span>
             </div>
-            <div className={`absolute bottom-0 left-0 h-1 bg-${stat.color}-500 transition-all duration-300 w-0 group-hover:w-full`}></div>
+            <div className={`absolute bottom-0 left-0 h-1 transition-all duration-300 w-0 group-hover:w-full ${
+              stat.color === 'blue' ? 'bg-blue-500' :
+              stat.color === 'purple' ? 'bg-purple-500' :
+              stat.color === 'orange' ? 'bg-orange-500' :
+              'bg-green-500'
+            }`}></div>
           </Card>
         ))}
       </div>

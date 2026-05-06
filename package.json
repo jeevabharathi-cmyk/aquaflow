@@ -1,0 +1,11 @@
+{
+  "name": "aquaflow-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix aquaflow-admin",
+    "build": "npm run build --prefix aquaflow-admin",
+    "lint": "npm run lint --prefix aquaflow-admin",
+    "preview": "npm run preview --prefix aquaflow-admin",
+    "test": "npm run test --prefix aquaflow-admin"
+  }
+}

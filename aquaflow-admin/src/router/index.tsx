@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AdminLayout } from '@/components/common/AdminLayout';
 
 // Lazy load pages
@@ -23,29 +23,39 @@ const PageLoader = () => (
   </div>
 );
 
+// Layout wrapper component that uses the AdminLayout
+const LayoutWrapper = () => (
+  <AdminLayout>
+    <Suspense fallback={<PageLoader />}>
+      <Outlet />
+    </Suspense>
+  </AdminLayout>
+);
+
 export const AppRouter = () => {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/login" element={<div className="flex h-screen items-center justify-center">Login Page Placeholder</div>} />
-        
-        <Route path="/" element={<AdminLayout><Navigate to="/dashboard" replace /></AdminLayout>} />
-        
-        <Route path="/dashboard" element={<AdminLayout><Dashboard /></AdminLayout>} />
-        <Route path="/orders" element={<AdminLayout><Orders /></AdminLayout>} />
-        <Route path="/suppliers" element={<AdminLayout><Suppliers /></AdminLayout>} />
-        <Route path="/inventory" element={<AdminLayout><Inventory /></AdminLayout>} />
-        <Route path="/products" element={<AdminLayout><Products /></AdminLayout>} />
-        <Route path="/assembly" element={<AdminLayout><Assembly /></AdminLayout>} />
-        <Route path="/customers" element={<AdminLayout><Customers /></AdminLayout>} />
-        <Route path="/dispatch" element={<AdminLayout><Dispatch /></AdminLayout>} />
-        <Route path="/payments" element={<AdminLayout><Payments /></AdminLayout>} />
-        <Route path="/analytics" element={<AdminLayout><Analytics /></AdminLayout>} />
-        <Route path="/settings" element={<AdminLayout><Settings /></AdminLayout>} />
-        <Route path="/audit" element={<AdminLayout><Audit /></AdminLayout>} />
+    <Routes>
+      <Route path="/login" element={<div className="flex h-screen items-center justify-center">Login Page Placeholder</div>} />
+      
+      {/* Admin Protected Routes */}
+      <Route element={<LayoutWrapper />}>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/suppliers" element={<Suppliers />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/assembly" element={<Assembly />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/dispatch" element={<Dispatch />} />
+        <Route path="/payments" element={<Payments />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/audit" element={<Audit />} />
+      </Route>
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </Suspense>
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 };

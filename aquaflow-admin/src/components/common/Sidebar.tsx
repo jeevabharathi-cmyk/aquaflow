@@ -54,6 +54,7 @@ export const Sidebar = () => {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={() => console.log('Sidebar link clicked:', item.label)}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
                 isActive 

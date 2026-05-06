@@ -240,7 +240,7 @@ const InventoryPage = () => {
       </div>
 
       {/* Table Section */}
-      <Card className="shadow-sm border-slate-200 overflow-hidden" bodyStyle={{ padding: 0 }}>
+      <Card className="shadow-sm border-slate-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
         <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center">
           <div className="relative flex-1 group">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
@@ -263,6 +263,7 @@ const InventoryPage = () => {
         <Table 
           columns={columns} 
           dataSource={mockMaterials} 
+          rowKey="id"
           pagination={{ pageSize: 10 }}
         />
       </Card>

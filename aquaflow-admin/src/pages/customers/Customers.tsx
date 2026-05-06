@@ -240,7 +240,12 @@ const CustomersPage = () => {
         ].map((m, i) => (
           <Card key={i} className="shadow-sm border-slate-100 hover:border-blue-200 transition-colors">
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-2xl bg-${m.color}-50 text-${m.color}-600`}>
+              <div className={`p-3 rounded-2xl ${
+                m.color === 'blue' ? 'bg-blue-50 text-blue-600' :
+                m.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
+                m.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                'bg-purple-50 text-purple-600'
+              }`}>
                 <m.icon className="w-6 h-6" />
               </div>
               <div>
@@ -256,7 +261,7 @@ const CustomersPage = () => {
       </div>
 
       {/* Table Section */}
-      <Card className="shadow-sm border-slate-200 overflow-hidden" bodyStyle={{ padding: 0 }}>
+      <Card className="shadow-sm border-slate-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
         <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center bg-white/50">
           <div className="relative flex-1 group">
             <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
@@ -273,6 +278,7 @@ const CustomersPage = () => {
         <Table 
           columns={columns} 
           dataSource={mockCustomers} 
+          rowKey="id"
           pagination={{ pageSize: 10 }}
           className="aquaflow-table"
         />
