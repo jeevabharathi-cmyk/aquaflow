@@ -98,41 +98,47 @@ const SettingsPage = () => {
     </>
   );
 
+  const [memberSearch, setMemberSearch] = useState('');
+  const filteredMembers = members.filter(m => 
+    m.name.toLowerCase().includes(memberSearch.toLowerCase()) || 
+    m.email.toLowerCase().includes(memberSearch.toLowerCase()) ||
+    m.role.toLowerCase().includes(memberSearch.toLowerCase())
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'General':
         return (
           <div className="space-y-6">
             <Card className="shadow-sm border-slate-200">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
                 <div className="flex items-center gap-4">
-                  <Avatar size={80} className="bg-blue-100 text-blue-600 font-black text-2xl">{profile.name.split(' ').map(n => n[0]).join('')}</Avatar>
+                  <Avatar size={80} className="bg-blue-100 text-blue-600 font-black text-2xl shadow-inner">{profile.name.split(' ').map(n => n[0]).join('')}</Avatar>
                   <div>
-                    <h3 className="text-xl font-bold text-slate-900">{profile.name}</h3>
-                    <p className="text-sm text-slate-500">{profile.role} • Last login: 2 hours ago</p>
+                    <h3 className="text-xl font-black text-slate-900">{profile.name}</h3>
+                    <p className="text-sm font-medium text-slate-500">{profile.role} • Last login: 2 hours ago</p>
                   </div>
                 </div>
-                <Button type="primary" className="bg-blue-600 rounded-lg h-10" onClick={() => { profileForm.setFieldsValue(profile); setProfileModal(true); }}>Edit Profile</Button>
+                <Button type="primary" className="bg-blue-600 rounded-xl h-11 px-6 font-bold shadow-lg shadow-blue-100" onClick={() => { profileForm.setFieldsValue(profile); setProfileModal(true); }}>Edit Profile</Button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1"><p className="text-xs font-black text-slate-400 uppercase tracking-widest">Email</p><p className="text-sm font-bold text-slate-700 flex items-center gap-2"><Mail className="w-4 h-4 text-slate-400" /> {profile.email}</p></div>
-                <div className="space-y-1"><p className="text-xs font-black text-slate-400 uppercase tracking-widest">Phone</p><p className="text-sm font-bold text-slate-700 flex items-center gap-2"><Smartphone className="w-4 h-4 text-slate-400" /> {profile.phone}</p></div>
-                <div className="space-y-1"><p className="text-xs font-black text-slate-400 uppercase tracking-widest">Location</p><p className="text-sm font-bold text-slate-700 flex items-center gap-2"><Building2 className="w-4 h-4 text-slate-400" /> {profile.location}</p></div>
-                <div className="space-y-1"><p className="text-xs font-black text-slate-400 uppercase tracking-widest">Status</p><Tag color="success" className="font-bold border-none uppercase tracking-widest text-[10px]">Verified Admin</Tag></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email</p><p className="text-sm font-bold text-slate-700 flex items-center gap-2"><Mail className="w-4 h-4 text-slate-400" /> {profile.email}</p></div>
+                <div className="space-y-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone</p><p className="text-sm font-bold text-slate-700 flex items-center gap-2"><Smartphone className="w-4 h-4 text-slate-400" /> {profile.phone}</p></div>
+                <div className="space-y-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</p><p className="text-sm font-bold text-slate-700 flex items-center gap-2"><Building2 className="w-4 h-4 text-slate-400" /> {profile.location}</p></div>
               </div>
             </Card>
             <Card className="shadow-sm border-slate-200" title={<span className="font-bold">System Preferences</span>}>
               <div className="space-y-6">
                 {renderPrefRow(<Bell className="w-5 h-5 text-slate-600" />, 'Low Stock Push Notifications', 'Receive alerts when raw materials fall below min-levels.', lowStock, setLowStock)}
                 {renderPrefRow(<Globe className="w-5 h-5 text-slate-600" />, 'Public Order Tracking', 'Allow customers to track orders without logging in.', publicTracking, setPublicTracking)}
-                {renderPrefRow(<Shield className="w-5 h-5 text-slate-600" />, 'Two-Factor Authentication', 'Enable 2FA for all administrative logins.', twoFA, setTwoFA)}
+                {renderPrefRow(<Shield className="w-5 h-5 text-slate-600" />, 'Two-Factor Authentication', 'Require 2FA for all administrative logins.', twoFA, setTwoFA)}
                 {renderPrefRow(<Database className="w-5 h-5 text-slate-600" />, 'Auto Backup', 'Automatically backup data every 24 hours.', autoBackup, setAutoBackup)}
               </div>
             </Card>
             <Card className="shadow-sm border-red-100 bg-red-50/30" title={<span className="font-bold text-red-600">Danger Zone</span>}>
               <div className="flex items-center justify-between">
                 <div><p className="text-sm font-bold text-slate-900">Clear System Audit Logs</p><p className="text-xs text-slate-500">Permanently delete logs older than 1 year.</p></div>
-                <Button danger type="primary" onClick={() => Modal.confirm({ title: 'Clear Logs', content: 'This will permanently delete all audit logs older than 1 year. This action cannot be undone.', okType: 'danger', okText: 'Clear Logs', onOk: () => message.success('Audit logs cleared') })}>Clear Logs</Button>
+                <Button danger type="primary" className="h-10 px-6 rounded-lg font-bold" onClick={() => Modal.confirm({ title: 'Clear Logs', content: 'This will permanently delete all audit logs older than 1 year. This action cannot be undone.', okType: 'danger', okText: 'Clear Logs', onOk: () => message.success('Audit logs cleared') })}>Clear Logs</Button>
               </div>
             </Card>
           </div>
@@ -140,12 +146,12 @@ const SettingsPage = () => {
 
       case 'Profile Settings':
         return (
-          <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Edit Profile</span>}>
-            <Form layout="vertical" initialValues={profile} onFinish={handleProfileSave} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 max-w-2xl">
+          <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Edit Profile Details</span>}>
+            <Form layout="vertical" initialValues={profile} onFinish={handleProfileSave} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 max-w-3xl">
               <Form.Item name="name" label={<span className="font-bold text-slate-700">Full Name</span>} rules={[{ required: true }]}>
                 <Input className="h-11 rounded-xl" />
               </Form.Item>
-              <Form.Item name="email" label={<span className="font-bold text-slate-700">Email</span>} rules={[{ required: true, type: 'email' }]}>
+              <Form.Item name="email" label={<span className="font-bold text-slate-700">Email Address</span>} rules={[{ required: true, type: 'email' }]}>
                 <Input className="h-11 rounded-xl" />
               </Form.Item>
               <Form.Item name="phone" label={<span className="font-bold text-slate-700">Phone</span>}>
@@ -155,7 +161,7 @@ const SettingsPage = () => {
                 <Input className="h-11 rounded-xl" />
               </Form.Item>
               <Form.Item className="md:col-span-2">
-                <Button type="primary" htmlType="submit" icon={<Save className="w-4 h-4" />} className="bg-blue-600 rounded-xl h-11 px-8 font-bold">Save Changes</Button>
+                <Button type="primary" htmlType="submit" icon={<Save className="w-4 h-4" />} className="bg-blue-600 rounded-xl h-11 px-8 font-bold shadow-lg shadow-blue-100">Save Changes</Button>
               </Form.Item>
             </Form>
           </Card>
@@ -164,22 +170,32 @@ const SettingsPage = () => {
       case 'Security & Auth':
         return (
           <div className="space-y-6">
-            <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Password</span>}>
-              <div className="flex items-center justify-between">
-                <div><p className="text-sm font-bold text-slate-900">Change Password</p><p className="text-xs text-slate-500">Last changed 30 days ago</p></div>
-                <Button icon={<Key className="w-4 h-4" />} onClick={() => { passForm.resetFields(); setChangePassModal(true); }}>Change Password</Button>
-              </div>
-            </Card>
-            <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Authentication Settings</span>}>
+            <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Security Controls</span>}>
               <div className="space-y-6">
-                {renderPrefRow(<Shield className="w-5 h-5 text-slate-600" />, 'Two-Factor Authentication', 'Require 2FA on every login.', twoFA, setTwoFA)}
-                {renderPrefRow(<Lock className="w-5 h-5 text-slate-600" />, 'Session Lock', 'Auto-lock after 15 min of inactivity.', true, () => message.info('Session lock toggled'))}
+                <div className="flex items-center justify-between">
+                  <div><p className="text-sm font-bold text-slate-900">Account Password</p><p className="text-xs text-slate-500 font-medium">Last changed 30 days ago</p></div>
+                  <Button icon={<Key className="w-4 h-4" />} className="h-10 px-6 rounded-lg font-bold" onClick={() => { passForm.resetFields(); setChangePassModal(true); }}>Update Password</Button>
+                </div>
+                <Divider className="my-0" />
+                {renderPrefRow(<Shield className="w-5 h-5 text-slate-600" />, 'Two-Factor Authentication', 'Add an extra layer of security to your account.', twoFA, setTwoFA)}
+                {renderPrefRow(<Smartphone className="w-5 h-5 text-slate-600" />, 'Biometric Login', 'Use fingerprint or face ID on supported devices.', false, () => message.info('Biometric login is platform dependent'))}
               </div>
             </Card>
-            <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Active Sessions</span>}>
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                <div><p className="font-bold text-sm text-slate-900">Current Browser — Chrome on Windows</p><p className="text-xs text-slate-400">IP: 192.168.1.1 • Started 2 hours ago</p></div>
-                <Tag color="success" className="border-none font-bold">Active</Tag>
+            <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Login History</span>}>
+              <div className="space-y-4">
+                {[
+                  { device: 'Chrome on Windows', ip: '192.168.1.1', time: 'Active Now', current: true },
+                  { device: 'Safari on iPhone 15', ip: '103.2.4.12', time: '2 hours ago', current: false },
+                  { device: 'Firefox on macOS', ip: '172.16.0.4', time: 'Yesterday, 10:45 PM', current: false },
+                ].map((s, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div>
+                      <p className="font-bold text-sm text-slate-900">{s.device}</p>
+                      <p className="text-[11px] text-slate-400 font-medium">IP: {s.ip} • {s.time}</p>
+                    </div>
+                    {s.current ? <Tag color="success" className="border-none font-bold text-[10px] uppercase tracking-widest">Current Session</Tag> : <Button size="small" type="text" className="text-[10px] font-bold text-red-500 hover:bg-red-50">Revoke</Button>}
+                  </div>
+                ))}
               </div>
             </Card>
           </div>
@@ -187,40 +203,83 @@ const SettingsPage = () => {
 
       case 'Notifications':
         return (
-          <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Notification Preferences</span>}>
+          <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Manage Alerts</span>}>
             <div className="space-y-6">
-              {renderPrefRow(<Mail className="w-5 h-5 text-slate-600" />, 'Email Notifications', 'Receive notifications via email.', emailNotif, setEmailNotif)}
-              {renderPrefRow(<Smartphone className="w-5 h-5 text-slate-600" />, 'SMS Notifications', 'Receive critical alerts via SMS.', smsNotif, setSmsNotif)}
-              <Divider><span className="text-xs font-bold text-slate-400 uppercase">Event Types</span></Divider>
-              {renderPrefRow(<CreditCard className="w-5 h-5 text-slate-600" />, 'Order Updates', 'New orders, status changes, cancellations.', orderNotif, setOrderNotif)}
-              {renderPrefRow(<CreditCard className="w-5 h-5 text-slate-600" />, 'Payment Alerts', 'Incoming payments, failed transactions.', paymentNotif, setPaymentNotif)}
-              {renderPrefRow(<Shield className="w-5 h-5 text-slate-600" />, 'Security Alerts', 'Login attempts, permission changes.', securityNotif, setSecurityNotif)}
+              {renderPrefRow(<Mail className="w-5 h-5 text-slate-600" />, 'Email Notifications', 'Get summarized updates in your inbox.', emailNotif, setEmailNotif)}
+              {renderPrefRow(<Smartphone className="w-5 h-5 text-slate-600" />, 'Push Notifications', 'Real-time alerts on your mobile and desktop.', orderNotif, setOrderNotif)}
+              <Divider className="my-0" />
+              <div className="space-y-1 pb-2">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Critical Alert Subscriptions</h4>
+                <p className="text-[11px] text-slate-400">Control which events trigger high-priority alerts.</p>
+              </div>
+              {renderPrefRow(<CreditCard className="w-5 h-5 text-slate-600" />, 'Inventory & Stock Alerts', 'Notifications for low stock and stock receipts.', lowStock, setLowStock)}
+              {renderPrefRow(<Smartphone className="w-5 h-5 text-slate-600" />, 'Payment Confirmations', 'Alerts for successful or failed incoming payments.', paymentNotif, setPaymentNotif)}
+              {renderPrefRow(<Shield className="w-5 h-5 text-slate-600" />, 'Security & Access', 'Alerts for logins from new devices.', securityNotif, setSecurityNotif)}
             </div>
           </Card>
         );
 
       case 'Team Members':
         return (
-          <Card className="shadow-sm border-slate-200" title={<span className="font-bold">Team Members</span>} extra={<Button type="primary" icon={<Plus className="w-4 h-4" />} className="bg-blue-600 rounded-xl font-bold" onClick={() => { memberForm.resetFields(); setAddMemberModal(true); }}>Add Member</Button>}>
-            <div className="space-y-4">
-              {members.map((m, i) => (
-                <div key={i} className="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:border-blue-200 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="bg-blue-100 text-blue-600 font-bold">{m.name.charAt(0)}</Avatar>
-                    <div>
-                      <p className="font-bold text-slate-900">{m.name}</p>
-                      <p className="text-xs text-slate-400">{m.email}</p>
+          <div className="space-y-6">
+            <Card 
+              className="shadow-sm border-slate-200" 
+              title={<span className="font-bold">Active Directory</span>} 
+              extra={<Button type="primary" icon={<Plus className="w-4 h-4" />} className="bg-blue-600 rounded-xl font-bold h-10 px-6 shadow-lg shadow-blue-100" onClick={() => { memberForm.resetFields(); setAddMemberModal(true); }}>Add Member</Button>}
+            >
+              <div className="mb-6 relative group">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                <Input 
+                  placeholder="Filter members by name, email or role..." 
+                  value={memberSearch}
+                  onChange={e => setMemberSearch(e.target.value)}
+                  className="pl-10 h-11 border-slate-200 rounded-xl bg-slate-50/50"
+                />
+              </div>
+              <div className="space-y-3">
+                {filteredMembers.length === 0 ? (
+                  <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                    <Shield className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                    <p className="text-slate-400 font-bold">No team members found</p>
+                  </div>
+                ) : (
+                  filteredMembers.map((m, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 border border-slate-100 rounded-2xl hover:border-blue-200 transition-all hover:bg-white hover:shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <Badge dot color={m.status === 'active' ? '#22c55e' : '#94a3b8'} offset={[-2, 32]}>
+                          <Avatar size={48} className="bg-blue-50 text-blue-600 font-bold rounded-xl border border-blue-100 shadow-sm">{m.name.charAt(0)}</Avatar>
+                        </Badge>
+                        <div>
+                          <p className="font-bold text-slate-900 leading-none mb-1">{m.name}</p>
+                          <p className="text-xs text-slate-400 font-medium">{m.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Tag className="rounded-full border-none font-bold text-[10px] uppercase tracking-widest px-3 py-0.5" color={m.role === 'Super Admin' ? 'blue' : 'default'}>{m.role}</Tag>
+                        {m.role !== 'Super Admin' && (
+                          <Dropdown menu={{
+                            items: [
+                              { key: 'edit', label: 'Edit Permissions', icon: <User className="w-3.5 h-3.5" /> },
+                              { key: 'status', label: m.status === 'active' ? 'Deactivate' : 'Activate', icon: <Smartphone className="w-3.5 h-3.5" />, onClick: () => {
+                                const newMembers = [...members];
+                                newMembers[members.findIndex(member => member.email === m.email)].status = m.status === 'active' ? 'inactive' : 'active';
+                                setMembers(newMembers);
+                                message.success(`${m.name} status updated`);
+                              }},
+                              { type: 'divider' },
+                              { key: 'remove', label: 'Remove From Team', icon: <Trash2 className="w-3.5 h-3.5" />, danger: true, onClick: () => handleRemoveMember(m.email) },
+                            ]
+                          }} trigger={['click']}>
+                            <Button type="text" icon={<MoreHorizontal className="w-5 h-5" />} className="text-slate-300 hover:text-slate-600" />
+                          </Dropdown>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Tag color={m.role === 'Super Admin' ? 'blue' : 'default'} className="rounded-full border-none font-bold text-[10px] uppercase">{m.role}</Tag>
-                    <Tag color={m.status === 'active' ? 'success' : 'default'} className="rounded-full border-none font-bold text-[10px] uppercase">{m.status}</Tag>
-                    {m.role !== 'Super Admin' && <Button size="small" danger type="text" icon={<Trash2 className="w-3.5 h-3.5" />} onClick={() => handleRemoveMember(m.email)} />}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
         );
 
       case 'Billing & Plans':

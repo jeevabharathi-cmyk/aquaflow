@@ -44,8 +44,14 @@ const PaymentsPage = () => {
   const [form] = Form.useForm();
 
   const filtered = payments.filter(p => {
-    const s = searchText.toLowerCase();
-    const matchSearch = p.customer.toLowerCase().includes(s) || p.id.toLowerCase().includes(s) || p.reference.toLowerCase().includes(s);
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      p.customer.toLowerCase().includes(term) || 
+      p.id.toLowerCase().includes(term) || 
+      p.reference.toLowerCase().includes(term) ||
+      p.method.toLowerCase().includes(term)
+    );
     const matchStatus = filterStatus === 'all' || p.status === filterStatus;
     const matchType = filterType === 'all' || p.type === filterType;
     return matchSearch && matchStatus && matchType;

@@ -43,11 +43,13 @@ import {
   Col,
   Switch
 } from 'antd';
+import { useSearchParams } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
 import { useStore, type Product, type BOMItem, type RawMaterial } from '../../store/useStore';
 
 const ProductsPage = () => {
   const { products, materials, addProduct, updateProduct, deleteProduct, assembleProduct } = useStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [viewType, setViewType] = useState<'grid' | 'list'>('list');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBOMModalOpen, setIsBOMModalOpen] = useState(false);
@@ -55,6 +57,22 @@ const ProductsPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchText, setSearchText] = useState('');
+
+  // Handle deep linking from search
+  React.useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      const product = products.find(p => p.id === id);
+      if (product) {
+        setSelectedProduct(product);
+        setIsEditMode(true);
+        setIsModalOpen(true);
+        // Remove param after opening
+        searchParams.delete('id');
+        setSearchParams(searchParams);
+      }
+    }
+  }, [searchParams, products]);
   const [categoryFilter, setCategoryFilter] = useState('All Products');
   const [statusFilter, setStatusFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState('all');
@@ -67,8 +85,14 @@ const ProductsPage = () => {
   const categories = ['All Products', '500ml', '1 Litre', '20 Litre Jars', 'Dispenser'];
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchText.toLowerCase()) || 
-                          p.sku.toLowerCase().includes(searchText.toLowerCase());
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      p.name.toLowerCase().includes(term) || 
+      p.sku.toLowerCase().includes(term) ||
+      p.category.toLowerCase().includes(term)
+    );
+    
     const matchesCategory = categoryFilter === 'All Products' || p.category === categoryFilter;
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
     const matchesStock = stockFilter === 'all' || 

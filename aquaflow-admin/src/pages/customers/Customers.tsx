@@ -44,13 +44,30 @@ import {
   Descriptions,
   InputNumber
 } from 'antd';
+import { useSearchParams } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
 import { useStore, type Customer } from '../../store/useStore';
 
 const CustomersPage = () => {
   const { customers, addCustomer, updateCustomer, deleteCustomer } = useStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
+
+  // Handle deep linking from search
+  React.useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      const customer = customers.find(c => c.id === id);
+      if (customer) {
+        setSelectedCustomer(customer);
+        setOrdersModalOpen(true); // Open orders/details drawer
+        // Remove param after opening
+        searchParams.delete('id');
+        setSearchParams(searchParams);
+      }
+    }
+  }, [searchParams, customers]);
   
   // Feature states
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -128,10 +145,15 @@ const CustomersPage = () => {
   };
 
   const filteredCustomers = customers.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchText.toLowerCase()) || 
-                          c.code.toLowerCase().includes(searchText.toLowerCase()) ||
-                          c.phone.includes(searchText) ||
-                          c.email.toLowerCase().includes(searchText.toLowerCase());
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      c.name.toLowerCase().includes(term) || 
+      c.code.toLowerCase().includes(term) ||
+      c.phone.includes(term) ||
+      c.email.toLowerCase().includes(term) ||
+      c.status.toLowerCase().includes(term)
+    );
     const matchesType = filterType === 'all' || c.type === filterType;
     const matchesStatus = filterStatus === 'all' || c.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;

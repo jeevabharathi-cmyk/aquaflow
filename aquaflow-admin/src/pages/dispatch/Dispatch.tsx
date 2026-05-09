@@ -26,7 +26,15 @@ const DispatchPage = () => {
   const [searchText, setSearchText] = useState('');
   const [dispatchForm] = Form.useForm();
 
-  const filteredDrivers = drivers.filter(d => d.name.toLowerCase().includes(searchText.toLowerCase()) || d.location.toLowerCase().includes(searchText.toLowerCase()));
+  const filteredDrivers = drivers.filter(d => {
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      d.name.toLowerCase().includes(term) || 
+      d.location.toLowerCase().includes(term)
+    );
+    return matchesSearch;
+  });
 
   const handleDriverClick = (driver: Driver) => { setSelectedDriver(driver); setDrawerOpen(true); };
 

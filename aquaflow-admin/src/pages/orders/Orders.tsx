@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -44,7 +43,7 @@ import {
   DatePicker,
   InputNumber
 } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 
 import type { ColumnsType } from 'antd/es/table';
@@ -186,6 +185,7 @@ const mockOrders: Order[] = [
 ];
 
 const OrdersPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [activeTab, setActiveTab] = useState('all');
   const [searchText, setSearchText] = useState('');
@@ -195,6 +195,21 @@ const OrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [form] = Form.useForm();
   const navigate = useNavigate();
+
+  // Handle deep linking from search
+  useEffect(() => {
+    const id = searchParams.get('id');
+    if (id) {
+      const order = orders.find(o => o.id === id);
+      if (order) {
+        setSelectedOrder(order);
+        setIsDetailsOpen(true);
+        // Remove param after opening
+        searchParams.delete('id');
+        setSearchParams(searchParams);
+      }
+    }
+  }, [searchParams, orders, setSearchParams]);
 
   const drivers = [
     { id: 1, name: 'Vijay Singh', status: 'Available' },
@@ -211,9 +226,14 @@ const OrdersPage = () => {
         ? ['placed', 'confirmed', 'processing', 'ready', 'assigned'].includes(order.status)
         : order.status === activeTab;
     
-    // Search Filter
-    const matchesSearch = order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-                          order.customer.toLowerCase().includes(searchText.toLowerCase());
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      order.orderNumber.toLowerCase().includes(term) ||
+      order.customer.toLowerCase().includes(term) ||
+      order.address.toLowerCase().includes(term) ||
+      order.status.toLowerCase().includes(term)
+    );
     
     return matchesTab && matchesSearch;
   });

@@ -75,7 +75,6 @@ interface AppState {
   deleteProduct: (id: string) => void;
   
   // Customer Actions
-  customers: Customer[];
   setCustomers: (customers: Customer[]) => void;
   addCustomer: (customer: Customer) => void;
   updateCustomer: (id: string, updates: Partial<Customer>) => void;

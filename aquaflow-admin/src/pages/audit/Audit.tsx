@@ -44,8 +44,14 @@ const AuditPage = () => {
   const uniqueUsers = [...new Set(mockAudit.map(a => a.actor))];
 
   const filtered = mockAudit.filter(r => {
-    const s = searchText.toLowerCase();
-    const matchSearch = r.actor.toLowerCase().includes(s) || r.action.toLowerCase().includes(s) || r.entity.toLowerCase().includes(s) || r.id.toLowerCase().includes(s);
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      r.actor.toLowerCase().includes(term) || 
+      r.action.toLowerCase().includes(term) || 
+      r.entity.toLowerCase().includes(term) || 
+      r.id.toLowerCase().includes(term)
+    );
     const matchAction = filterAction === 'all' || r.action === filterAction;
     const matchUser = filterUser === 'all' || r.actor === filterUser;
     return matchSearch && matchAction && matchUser;

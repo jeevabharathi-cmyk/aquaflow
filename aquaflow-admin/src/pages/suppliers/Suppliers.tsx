@@ -130,8 +130,14 @@ const SuppliersPage = () => {
   };
 
   const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch = supplier.name.toLowerCase().includes(searchText.toLowerCase()) || 
-                         supplier.code.toLowerCase().includes(searchText.toLowerCase());
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      supplier.name.toLowerCase().includes(term) || 
+      supplier.code.toLowerCase().includes(term) ||
+      supplier.email.toLowerCase().includes(term) ||
+      supplier.contactPerson.toLowerCase().includes(term)
+    );
     const matchesStatus = statusFilter === 'all' || supplier.status === statusFilter;
     return matchesSearch && matchesStatus;
   });

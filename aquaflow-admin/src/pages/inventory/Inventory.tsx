@@ -71,8 +71,12 @@ const InventoryPage = () => {
   };
 
   const filteredMaterials = materials.filter(m => {
-    const matchesSearch = m.name.toLowerCase().includes(searchText.toLowerCase()) || 
-                          m.sku.toLowerCase().includes(searchText.toLowerCase());
+    // Robust multi-keyword search
+    const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.trim().length > 0);
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => 
+      m.name.toLowerCase().includes(term) || 
+      m.sku.toLowerCase().includes(term)
+    );
     const matchesType = typeFilter === 'all' || m.type === typeFilter;
     return matchesSearch && matchesType;
   });
