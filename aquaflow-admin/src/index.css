@@ -24,8 +24,45 @@ body {
   background: linear-gradient(135deg, #0077B6 0%, #00B4D8 100%);
 }
 
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Responsive Modal */
+.responsive-modal {
+  max-width: calc(100vw - 32px) !important;
+  margin: 16px auto !important;
+}
+
+@media (max-width: 640px) {
+  .ant-modal {
+    width: calc(100vw - 32px) !important;
+    max-width: none !important;
+  }
 }

@@ -181,20 +181,22 @@ const InventoryPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Boxes className="w-6 h-6 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-xl">
+              <Boxes className="w-6 h-6 text-blue-600" />
+            </div>
             Raw Material Inventory
           </h1>
-          <p className="text-slate-500 mt-1">Track and manage raw materials for water bottle production.</p>
+          <p className="text-slate-500 mt-1 font-medium">Track and manage raw materials for water bottle production.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button icon={<History className="w-4 h-4" />}>Stock Ledger</Button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Button icon={<History className="w-4 h-4" />} className="h-11 px-4 rounded-xl border-slate-200 font-semibold flex-1 sm:flex-none">Stock Ledger</Button>
           <Button 
             type="primary" 
             icon={<Plus className="w-4 h-4" />} 
-            className="h-10 px-6 bg-blue-600"
+            className="h-11 px-6 bg-blue-600 rounded-xl shadow-lg shadow-blue-100 font-bold flex-1 sm:flex-none"
             onClick={() => setIsModalOpen(true)}
           >
             Add Material
@@ -203,7 +205,7 @@ const InventoryPage = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card className="shadow-sm border-slate-200">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
@@ -240,18 +242,18 @@ const InventoryPage = () => {
       </div>
 
       {/* Table Section */}
-      <Card className="shadow-sm border-slate-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
-        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center">
-          <div className="relative flex-1 group">
+      <Card className="shadow-sm border-slate-200 rounded-xl overflow-hidden" styles={{ body: { padding: 0 } }}>
+        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row gap-4 items-center bg-white/50">
+          <div className="relative flex-1 w-full group">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
             <Input 
               placeholder="Search by SKU or name..." 
-              className="pl-10 h-10 border-slate-200 rounded-lg"
+              className="pl-10 h-11 border-slate-200 rounded-xl bg-slate-50/50"
             />
           </div>
           <Select 
             defaultValue="all" 
-            className="w-full md:w-40 h-10" 
+            className="w-full sm:w-40 h-11" 
             options={[
               { value: 'all', label: 'All Types' },
               { value: 'bottle', label: 'Bottles' },

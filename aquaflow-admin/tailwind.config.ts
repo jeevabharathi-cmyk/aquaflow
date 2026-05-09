@@ -38,6 +38,9 @@ const config: Config = {
       height: {
         'topbar': '64px',
       },
+      screens: {
+        'xs': '480px',
+      },
       spacing: {
         'content': '24px',
       }

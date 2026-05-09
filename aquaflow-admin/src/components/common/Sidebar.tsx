@@ -14,9 +14,15 @@ import {
   Factory,
   Boxes,
   CreditCard,
-  Building2
+  Building2,
+  X
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
+
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -33,18 +39,29 @@ const menuItems = [
   { icon: History, label: 'Audit Log', path: '/audit' },
 ];
 
-export const Sidebar = () => {
+export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-screen fixed left-0 top-0 z-50 transition-all duration-300">
-      <div className="h-16 flex items-center px-6 border-b border-slate-800 shrink-0">
-        <div className="flex items-center gap-2">
+    <aside className={cn(
+      "w-64 bg-slate-900 text-slate-300 flex flex-col h-screen fixed left-0 top-0 z-[70] transition-transform duration-300 lg:translate-x-0",
+      isOpen ? "translate-x-0" : "-translate-x-full"
+    )}>
+      <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 shrink-0">
+        <a href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-xl">A</span>
           </div>
           <span className="text-white font-bold text-xl tracking-tight">AquaFlow</span>
-        </div>
+        </a>
+        
+        {/* Mobile Close Button */}
+        <button 
+          onClick={onClose}
+          className="lg:hidden p-2 hover:bg-slate-800 rounded-lg text-slate-400"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
@@ -54,7 +71,10 @@ export const Sidebar = () => {
             <NavLink
               key={item.path}
               to={item.path}
-              onClick={() => console.log('Sidebar link clicked:', item.label)}
+              onClick={() => {
+                console.log('Sidebar link clicked:', item.label);
+                if (window.innerWidth < 1024) onClose();
+              }}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
                 isActive 
@@ -73,8 +93,8 @@ export const Sidebar = () => {
       </nav>
 
       <div className="p-4 border-t border-slate-800 shrink-0">
-        <div className="bg-slate-800/50 rounded-xl p-3 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm">
+        <div className="bg-slate-800/50 rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:bg-slate-800 transition-colors group">
+          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm group-hover:scale-105 transition-transform">
             JD
           </div>
           <div className="flex-1 min-w-0">

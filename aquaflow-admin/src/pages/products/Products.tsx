@@ -190,55 +190,57 @@ const ProductsPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Package className="w-6 h-6 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-xl">
+              <Package className="w-6 h-6 text-blue-600" />
+            </div>
             Product Management
           </h1>
-          <p className="text-slate-500 mt-1">Manage finished goods and their manufacturing requirements.</p>
+          <p className="text-slate-500 mt-1 font-medium">Manage finished goods and their manufacturing requirements.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Space.Compact className="bg-white rounded-lg border border-slate-200 p-0.5">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Space.Compact className="bg-white rounded-xl border border-slate-200 p-1 shadow-sm flex-1 sm:flex-none justify-center">
             <Button 
               type={viewType === 'list' ? 'primary' : 'text'} 
               icon={<List className="w-4 h-4" />} 
               onClick={() => setViewType('list')}
-              className={viewType === 'list' ? 'bg-blue-600' : 'text-slate-500'}
+              className={`h-9 px-4 rounded-lg flex-1 sm:flex-none ${viewType === 'list' ? 'bg-blue-600 shadow-md shadow-blue-100' : 'text-slate-500'}`}
             />
             <Button 
               type={viewType === 'grid' ? 'primary' : 'text'} 
               icon={<LayoutGrid className="w-4 h-4" />} 
               onClick={() => setViewType('grid')}
-              className={viewType === 'grid' ? 'bg-blue-600' : 'text-slate-500'}
+              className={`h-9 px-4 rounded-lg flex-1 sm:flex-none ${viewType === 'grid' ? 'bg-blue-600 shadow-md shadow-blue-100' : 'text-slate-500'}`}
             />
           </Space.Compact>
-          <Button type="primary" icon={<Plus className="w-4 h-4" />} className="h-10 px-6 bg-blue-600">
+          <Button type="primary" icon={<Plus className="w-4 h-4" />} className="h-11 px-6 bg-blue-600 rounded-xl shadow-lg shadow-blue-100 font-bold flex-1 sm:flex-none">
             Create Product
           </Button>
         </div>
       </div>
 
       {/* Categories & Filter */}
-      <div className="flex flex-wrap gap-2">
-        <Button className="rounded-full bg-blue-600 text-white border-none shadow-sm hover:bg-blue-700">All Products</Button>
-        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600">500ml</Button>
-        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600">1 Litre</Button>
-        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600">20 Litre Jars</Button>
-        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600">Dispenser</Button>
+      <div className="flex flex-wrap gap-2 pb-2 overflow-x-auto no-scrollbar">
+        <Button className="rounded-full bg-blue-600 text-white border-none shadow-sm hover:bg-blue-700 font-semibold shrink-0">All Products</Button>
+        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600 font-semibold shrink-0">500ml</Button>
+        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600 font-semibold shrink-0">1 Litre</Button>
+        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600 font-semibold shrink-0">20 Litre Jars</Button>
+        <Button className="rounded-full bg-white text-slate-600 border-slate-200 hover:border-blue-500 hover:text-blue-600 font-semibold shrink-0">Dispenser</Button>
       </div>
 
       {/* Search Bar */}
-      <Card className="shadow-sm border-slate-200">
-        <div className="flex gap-4">
+      <Card className="shadow-sm border-slate-200 rounded-xl overflow-hidden" styles={{ body: { padding: '12px' } }}>
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 group">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
             <Input 
               placeholder="Search products by name or SKU..." 
-              className="pl-10 h-10 border-slate-200 rounded-lg"
+              className="pl-10 h-11 border-slate-200 rounded-xl bg-slate-50/50 hover:bg-white focus:bg-white transition-all"
             />
           </div>
-          <Button icon={<Filter className="w-4 h-4" />} className="h-10 px-6 font-medium">More Filters</Button>
+          <Button icon={<Filter className="w-4 h-4" />} className="h-11 px-6 font-bold rounded-xl border-slate-200 text-slate-600">More Filters</Button>
         </div>
       </Card>
 

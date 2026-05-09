@@ -191,32 +191,28 @@ const SuppliersPage = () => {
         <Button 
           type="primary" 
           icon={<Plus className="w-4 h-4" />} 
-          className="h-10 px-6 bg-blue-600 hover:bg-blue-700"
-          onClick={() => {
-            console.log('Button clicked');
-            alert('Button clicked!');
-            setIsModalOpen(true);
-          }}
+          className="h-10 px-6 bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+          onClick={() => setIsModalOpen(true)}
         >
           Add New Supplier
         </Button>
       </div>
 
       {/* Filters & Search */}
-      <Card className="shadow-sm border-slate-200">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <div className="relative flex-1 group">
+      <Card className="shadow-sm border-slate-200 rounded-xl overflow-hidden" styles={{ body: { padding: '16px' } }}>
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <div className="relative w-full sm:flex-1 group">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
             <Input 
-              placeholder="Search by name, code or contact..." 
+              placeholder="Search by name, code..." 
               value={searchText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
-              className="pl-10 h-10 border-slate-200 hover:border-blue-400 focus:border-blue-500 rounded-lg"
+              className="pl-10 h-11 border-slate-200 hover:border-blue-400 focus:border-blue-500 rounded-xl w-full bg-slate-50/50"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Button icon={<Filter className="w-4 h-4" />} className="h-10 border-slate-200">Status: All</Button>
-            <Button icon={<Download className="w-4 h-4" />} className="h-10 border-slate-200">Export</Button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button icon={<Filter className="w-4 h-4" />} className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-slate-200 font-semibold text-slate-600">Status</Button>
+            <Button icon={<Download className="w-4 h-4" />} className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-slate-200 font-semibold text-slate-600">Export</Button>
           </div>
         </div>
       </Card>
@@ -229,6 +225,7 @@ const SuppliersPage = () => {
           rowKey="id"
           pagination={{ pageSize: 10 }}
           className="aquaflow-table"
+          scroll={{ x: 900 }}
         />
       </Card>
 

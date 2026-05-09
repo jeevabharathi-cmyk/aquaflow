@@ -1,9 +1,13 @@
 import * as React from 'react';
-import { Bell, Search, LogOut, User } from 'lucide-react';
+import { Bell, Search, LogOut, User, Menu } from 'lucide-react';
 import { Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 
-export const Header = () => {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export const Header = ({ onMenuClick }: HeaderProps) => {
   const userMenuItems: MenuProps['items'] = [
     {
       key: 'profile',
@@ -22,23 +26,43 @@ export const Header = () => {
   ];
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40">
-      <div className="flex items-center gap-4 flex-1">
-        <div className="relative w-full max-w-md group">
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-40">
+      <div className="flex items-center gap-1 sm:gap-4 flex-1 min-w-0">
+        {/* Mobile Menu Toggle */}
+        <button 
+          onClick={onMenuClick}
+          className="lg:hidden p-2 hover:bg-slate-50 rounded-lg text-slate-600 shrink-0"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <div className="relative w-full max-w-[140px] xs:max-w-xs sm:max-w-md group transition-all duration-300 focus-within:max-w-[200px] sm:focus-within:max-w-md">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
           <input 
             type="text" 
-            placeholder="Search anything..." 
-            className="w-full bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl py-2 pl-10 pr-4 text-sm transition-all outline-none"
+            placeholder="Search..." 
+            className="w-full bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl py-2 pl-9 pr-4 text-sm transition-all outline-none"
           />
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <button className="p-2 hover:bg-slate-50 rounded-xl relative text-slate-600 transition-colors">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
+        <Dropdown
+          menu={{
+            items: [
+              { key: '1', label: 'New order received (#ORD-005)', extra: '2m ago' },
+              { key: '2', label: 'Supplier Crystal Clear updated status', extra: '1h ago' },
+              { key: '3', label: 'Low stock alert: PET Bottles', extra: '3h ago', danger: true },
+            ]
+          }}
+          placement="bottomRight"
+          trigger={['click']}
+        >
+          <button className="p-2 hover:bg-slate-50 rounded-xl relative text-slate-600 transition-colors">
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+        </Dropdown>
 
         <div className="h-8 w-[1px] bg-slate-200 mx-2"></div>
 

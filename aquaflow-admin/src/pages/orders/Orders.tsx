@@ -211,55 +211,59 @@ const OrdersPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <ShoppingCart className="w-6 h-6 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-xl">
+              <ShoppingCart className="w-6 h-6 text-blue-600" />
+            </div>
             Orders & Logistics
           </h1>
-          <p className="text-slate-500 mt-1">Real-time order tracking, scheduling, and fulfillment.</p>
+          <p className="text-slate-500 mt-1 font-medium">Real-time order tracking, scheduling, and fulfillment.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button icon={<Map className="w-4 h-4" />} className="h-10 font-bold border-slate-200">Live Map</Button>
-          <Button type="primary" icon={<Plus className="w-4 h-4" />} className="h-10 px-6 bg-blue-600 shadow-lg shadow-blue-200">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Button icon={<Map className="w-4 h-4" />} className="h-11 px-4 rounded-xl border-slate-200 font-semibold flex-1 sm:flex-none">Live Map</Button>
+          <Button type="primary" icon={<Plus className="w-4 h-4" />} className="h-11 px-6 bg-blue-600 rounded-xl shadow-lg shadow-blue-100 font-bold flex-1 sm:flex-none">
             Create Order
           </Button>
         </div>
       </div>
 
       {/* Tabs & Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200">
-        <Tabs 
-          activeKey={activeTab} 
-          onChange={setActiveTab}
-          className="order-tabs"
-          items={[
-            { key: 'all', label: <span className="font-bold px-2">All Orders</span> },
-            { key: 'pending', label: <span className="font-bold px-2">Pending <Badge count={12} offset={[10, 0]} className="scale-75" /></span> },
-            { key: 'dispatched', label: <span className="font-bold px-2">Dispatched</span> },
-            { key: 'delivered', label: <span className="font-bold px-2">Delivered</span> },
-            { key: 'cancelled', label: <span className="font-bold px-2">Cancelled</span> },
-          ]}
-        />
-        <div className="flex items-center gap-3 pb-3">
-          <div className="relative group min-w-[280px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500" />
-            <Input placeholder="Search by Order ID, Customer..." className="pl-10 h-10 rounded-lg border-slate-200" />
+      <div className="flex flex-col gap-4 border-b border-slate-200">
+        <div className="overflow-x-auto no-scrollbar -mb-px">
+          <Tabs 
+            activeKey={activeTab} 
+            onChange={setActiveTab}
+            className="order-tabs"
+            items={[
+              { key: 'all', label: <span className="font-bold px-1 sm:px-2">All Orders</span> },
+              { key: 'pending', label: <span className="font-bold px-1 sm:px-2">Pending <Badge count={12} offset={[10, 0]} className="scale-75" /></span> },
+              { key: 'dispatched', label: <span className="font-bold px-1 sm:px-2">Dispatched</span> },
+              { key: 'delivered', label: <span className="font-bold px-1 sm:px-2">Delivered</span> },
+              { key: 'cancelled', label: <span className="font-bold px-1 sm:px-2">Cancelled</span> },
+            ]}
+          />
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3 pb-4">
+          <div className="relative group w-full sm:flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+            <Input placeholder="Search by Order ID, Customer..." className="pl-10 h-11 rounded-xl border-slate-200 bg-slate-50/50" />
           </div>
-          <Button icon={<Filter className="w-4 h-4" />} className="h-10 border-slate-200 font-bold">Filters</Button>
+          <Button icon={<Filter className="w-4 h-4" />} className="h-11 px-6 border-slate-200 font-bold rounded-xl w-full sm:w-auto text-slate-600">Filters</Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
           { title: "Today's Orders", value: '142', icon: ShoppingCart, color: 'blue' },
           { title: 'In Transit', value: '18', icon: Truck, color: 'orange' },
           { title: 'Successful', value: '114', icon: CheckCircle2, color: 'emerald' },
           { title: 'Issues', value: '3', icon: AlertCircle, color: 'red' },
         ].map((s, i) => (
-          <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-             <div className={`p-3 rounded-xl ${
+          <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-blue-200 transition-colors">
+             <div className={`p-3 rounded-xl transition-transform group-hover:scale-110 ${
                s.color === 'blue' ? 'bg-blue-50 text-blue-600' :
                s.color === 'orange' ? 'bg-orange-50 text-orange-600' :
                s.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
@@ -276,13 +280,14 @@ const OrdersPage = () => {
       </div>
 
       {/* Orders Table */}
-      <Card styles={{ body: { padding: 0 } }} className="shadow-sm border-slate-200 overflow-hidden">
+      <Card styles={{ body: { padding: 0 } }} className="shadow-sm border-slate-200 rounded-xl overflow-hidden">
         <Table 
           columns={columns} 
           dataSource={mockOrders} 
           rowKey="id"
           pagination={{ pageSize: 10 }}
           className="aquaflow-table"
+          scroll={{ x: 800 }}
         />
       </Card>
 
@@ -293,7 +298,8 @@ const OrdersPage = () => {
         open={isDetailsOpen}
         onCancel={() => setIsDetailsOpen(false)}
         width={850}
-        className="order-details-modal"
+        style={{ top: 20 }}
+        className="order-details-modal responsive-modal"
       >
         <div className="relative">
           {/* Header */}

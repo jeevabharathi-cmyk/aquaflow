@@ -212,18 +212,20 @@ const CustomersPage = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Users className="w-6 h-6 text-blue-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-xl">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
             Customer Directory
           </h1>
-          <p className="text-slate-500 mt-1">Monitor account health, balances, and customer performance.</p>
+          <p className="text-slate-500 mt-1 font-medium">Monitor account health, balances, and customer performance.</p>
         </div>
         <Button 
           type="primary" 
           icon={<UserPlus className="w-4 h-4" />} 
-          className="h-10 px-6 bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-200"
+          className="h-11 px-6 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-100 rounded-xl font-bold w-full lg:w-auto"
           onClick={() => setIsModalOpen(true)}
         >
           Register Customer
@@ -231,7 +233,7 @@ const CustomersPage = () => {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
           { label: 'Total Customers', value: '3,842', trend: '+12%', icon: Users, color: 'blue' },
           { label: 'Total Receivable', value: '₹4.8L', trend: '+5%', icon: CreditCard, color: 'indigo' },

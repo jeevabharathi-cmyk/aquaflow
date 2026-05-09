@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { NavLink } from 'react-router-dom';
 import { 
   TrendingUp, 
   Users, 
@@ -22,7 +23,10 @@ import {
   BarChart,
   Bar
 } from 'recharts';
-import { Card, Button, Table, Tag, Space, Dropdown } from 'antd';
+import { Card, Button, Table, Tag, Space, Dropdown, message, DatePicker, Modal, Checkbox } from 'antd';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import type { ColumnsType } from 'antd/es/table';
 
 const data = [
@@ -42,7 +46,8 @@ const stats = [
     change: "+12.5%",
     isPositive: true,
     icon: TrendingUp,
-    color: "blue"
+    color: "blue",
+    path: "/analytics"
   },
   {
     title: "Active Customers",
@@ -50,7 +55,8 @@ const stats = [
     change: "+4.3%",
     isPositive: true,
     icon: Users,
-    color: "purple"
+    color: "purple",
+    path: "/customers"
   },
   {
     title: "Pending Orders",
@@ -58,7 +64,8 @@ const stats = [
     change: "-2.1%",
     isPositive: false,
     icon: Package,
-    color: "orange"
+    color: "orange",
+    path: "/orders"
   },
   {
     title: "Avg Delivery Time",
@@ -66,7 +73,8 @@ const stats = [
     change: "+1.2%",
     isPositive: true,
     icon: Truck,
-    color: "green"
+    color: "green",
+    path: "/dispatch"
   }
 ];
 
@@ -124,56 +132,153 @@ const recentOrders: OrderRecord[] = [
   { key: '4', orderId: 'ORD-004', customer: 'Suresh Raina', amount: '1,100', status: 'delivered', date: '2 hours ago' },
 ];
 
+const AnimatedNumber = ({ value }: { value: string }) => {
+  const numericValue = parseFloat(value.replace(/[^\d.-]/g, '')) || 0;
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => {
+    const isCurrency = value.includes('₹');
+    const isTime = value.includes('m');
+    const formatted = Math.floor(latest).toLocaleString('en-IN');
+    
+    if (isCurrency) return `₹${formatted}`;
+    if (isTime) return `${formatted}m`;
+    return formatted;
+  });
+
+  React.useEffect(() => {
+    const controls = animate(count, numericValue, { duration: 2, ease: "easeOut" });
+    return () => controls.stop();
+  }, [numericValue]);
+
+  return <motion.span>{rounded}</motion.span>;
+};
+
 const DashboardPage = () => {
+  const [exportLoading, setExportLoading] = React.useState(false);
+  const [selectedOrder, setSelectedOrder] = React.useState<OrderRecord | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
+  const dashboardRef = React.useRef<HTMLDivElement>(null);
+
+  const handleRowClick = (record: OrderRecord) => {
+    setSelectedOrder(record);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleExport = async () => {
+    if (!dashboardRef.current) return;
+    
+    setExportLoading(true);
+    const hide = message.loading('Preparing your report...', 0);
+    
+    try {
+      const canvas = await html2canvas(dashboardRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#F8FAFC' // slate-50
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`AquaFlow-Executive-Report-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      message.success('Report downloaded successfully!');
+    } catch (error) {
+      console.error('Export failed:', error);
+      message.error('Failed to generate report. Please try again.');
+    } finally {
+      hide();
+      setExportLoading(false);
+    }
+  };
+
+  const filterMenu = {
+    items: [
+      { key: '1', label: <Checkbox>Active Only</Checkbox> },
+      { key: '2', label: <Checkbox>Pending Only</Checkbox> },
+      { type: 'divider' },
+      { key: '3', label: 'Apply Filters', type: 'primary' },
+    ]
+  };
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Executive Dashboard</h1>
-          <p className="text-slate-500 mt-1">Welcome back, here's what's happening today.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Executive Dashboard</h1>
+          <p className="text-slate-500 mt-1 text-sm sm:text-base font-medium">Welcome back, here's what's happening today.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button icon={<Calendar className="w-4 h-4" />}>May 2026</Button>
-          <Button icon={<Filter className="w-4 h-4" />}>Filters</Button>
-          <Button type="primary" icon={<Download className="w-4 h-4" />}>Export Report</Button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+          <div className="flex-1 sm:flex-none">
+            <DatePicker.RangePicker 
+              picker="date" 
+              className="w-full h-10 rounded-xl border-slate-200"
+              placeholder={['Start', 'End']}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <Dropdown menu={filterMenu} trigger={['click']}>
+              <Button icon={<Filter className="w-4 h-4" />} className="h-10 px-6 rounded-xl border-slate-200 font-semibold flex-1 sm:flex-none">Filters</Button>
+            </Dropdown>
+            <Button 
+              type="primary" 
+              icon={<Download className="w-4 h-4" />}
+              loading={exportLoading}
+              onClick={handleExport}
+              className="h-10 px-6 rounded-xl bg-blue-600 shadow-lg shadow-blue-100 font-semibold flex-1 sm:flex-none"
+            >
+              Export
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div ref={dashboardRef} className="space-y-8">
+        {/* Stats Grid */}
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat, i) => (
-          <Card key={i} className="hover:shadow-md transition-shadow duration-300 overflow-hidden group">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-500 mb-1">{stat.title}</p>
-                <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
+          <NavLink key={i} to={stat.path} className="block">
+            <Card className="hover:shadow-md hover:border-blue-200 transition-all duration-300 overflow-hidden group cursor-pointer h-full">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 mb-1">{stat.title}</p>
+                  <h3 className="text-2xl font-bold text-slate-900">
+                    <AnimatedNumber value={stat.value} />
+                  </h3>
+                </div>
+              <div className={`p-2.5 rounded-xl transition-transform ${
+                stat.color === 'blue' ? 'bg-blue-50 text-blue-600' :
+                stat.color === 'purple' ? 'bg-purple-50 text-purple-600' :
+                stat.color === 'orange' ? 'bg-orange-50 text-orange-600' :
+                'bg-green-50 text-green-600'
+              } group-hover:scale-110`}>
+                  <stat.icon className="w-5 h-5" />
+                </div>
               </div>
-            <div className={`p-2.5 rounded-xl transition-transform ${
-              stat.color === 'blue' ? 'bg-blue-50 text-blue-600' :
-              stat.color === 'purple' ? 'bg-purple-50 text-purple-600' :
-              stat.color === 'orange' ? 'bg-orange-50 text-orange-600' :
-              'bg-green-50 text-green-600'
-            } group-hover:scale-110`}>
-                <stat.icon className="w-5 h-5" />
+              <div className="mt-4 flex items-center gap-2">
+                <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  stat.isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                }`}>
+                  {stat.isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  {stat.change}
+                </span>
+                <span className="text-xs text-slate-400">vs last month</span>
               </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                stat.isPositive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-              }`}>
-                {stat.isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                {stat.change}
-              </span>
-              <span className="text-xs text-slate-400">vs last month</span>
-            </div>
-            <div className={`absolute bottom-0 left-0 h-1 transition-all duration-300 w-0 group-hover:w-full ${
-              stat.color === 'blue' ? 'bg-blue-500' :
-              stat.color === 'purple' ? 'bg-purple-500' :
-              stat.color === 'orange' ? 'bg-orange-500' :
-              'bg-green-500'
-            }`}></div>
-          </Card>
+              <div className={`absolute bottom-0 left-0 h-1 transition-all duration-300 w-0 group-hover:w-full ${
+                stat.color === 'blue' ? 'bg-blue-500' :
+                stat.color === 'purple' ? 'bg-purple-500' :
+                stat.color === 'orange' ? 'bg-orange-500' :
+                'bg-green-500'
+              }`}></div>
+            </Card>
+          </NavLink>
         ))}
       </div>
 
@@ -265,16 +370,106 @@ const DashboardPage = () => {
       <Card className="shadow-sm" title={
         <div className="flex items-center justify-between py-1">
           <span className="font-bold text-lg">Recent Orders</span>
-          <Button type="link" className="font-semibold">View All Orders</Button>
+          <NavLink to="/orders">
+            <Button type="link" className="font-semibold text-blue-600 hover:text-blue-700 p-0">View All Orders</Button>
+          </NavLink>
         </div>
       }>
         <Table 
           columns={columns} 
           dataSource={recentOrders} 
           pagination={false}
-          className="border-none"
+          className="border-none cursor-pointer"
+          scroll={{ x: 600 }}
+          onRow={(record) => ({
+            onClick: () => handleRowClick(record),
+          })}
         />
       </Card>
+
+      {/* Order Detail Modal */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <Package className="w-5 h-5" />
+            </div>
+            <span className="text-xl font-bold">Order Details - #{selectedOrder?.orderId}</span>
+          </div>
+        }
+        open={isDetailModalOpen}
+        onCancel={() => setIsDetailModalOpen(false)}
+        footer={[
+          <Button key="close" onClick={() => setIsDetailModalOpen(false)}>Close</Button>,
+          <Button key="print" type="primary" icon={<Download className="w-4 h-4" />}>Download Invoice</Button>
+        ]}
+        width={600}
+      >
+        {selectedOrder && (
+          <div className="py-6 space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Customer Name</p>
+                <p className="text-base font-bold text-slate-900">{selectedOrder.customer}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Order Status</p>
+                <Tag color={
+                  selectedOrder.status === 'delivered' ? 'success' :
+                  selectedOrder.status === 'processing' ? 'processing' :
+                  selectedOrder.status === 'pending' ? 'warning' : 'error'
+                } className="rounded-full px-3">
+                  {selectedOrder.status.toUpperCase()}
+                </Tag>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Order Amount</p>
+                <p className="text-base font-bold text-slate-900">₹{selectedOrder.amount}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Order Date</p>
+                <p className="text-base font-bold text-slate-900">{selectedOrder.date}</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
+              <p className="text-sm font-bold text-slate-900">Delivery Information</p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Address</span>
+                  <span className="text-slate-900 font-medium">123, Aqua Street, Chennai</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Contact</span>
+                  <span className="text-slate-900 font-medium">+91 98765 43210</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-sm font-bold text-slate-900">Item Summary</p>
+              <div className="border border-slate-100 rounded-xl overflow-hidden">
+                <div className="bg-slate-50 px-4 py-2 flex justify-between text-xs font-bold text-slate-500">
+                  <span>Product</span>
+                  <span>Qty</span>
+                  <span>Price</span>
+                </div>
+                <div className="px-4 py-3 flex justify-between text-sm border-t border-slate-100">
+                  <span className="font-medium">20L Purified Water Bottle</span>
+                  <span>5</span>
+                  <span className="font-bold">₹600</span>
+                </div>
+                <div className="px-4 py-3 flex justify-between text-sm border-t border-slate-100">
+                  <span className="font-medium">Delivery Charges</span>
+                  <span>-</span>
+                  <span className="font-bold">₹100</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+      </div>
     </div>
   );
 };
