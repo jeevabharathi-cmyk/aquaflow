@@ -40,10 +40,26 @@ export interface Product {
   bom: BOMItem[];
 }
 
+export interface Customer {
+  id: string;
+  code: string;
+  name: string;
+  type: 'individual' | 'business' | 'event';
+  email: string;
+  phone: string;
+  balance: number;
+  creditLimit: number;
+  status: 'active' | 'inactive' | 'suspended';
+  lastOrder: string;
+  joinDate: string;
+}
+
 interface AppState {
   materials: RawMaterial[];
   products: Product[];
   ledger: LedgerEntry[];
+  customers: Customer[];
+
   
   // Material Actions
   setMaterials: (materials: RawMaterial[]) => void;
@@ -58,6 +74,13 @@ interface AppState {
   updateProduct: (id: string, updates: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   
+  // Customer Actions
+  customers: Customer[];
+  setCustomers: (customers: Customer[]) => void;
+  addCustomer: (customer: Customer) => void;
+  updateCustomer: (id: string, updates: Partial<Customer>) => void;
+  deleteCustomer: (id: string) => void;
+
   // Assembly
   assembleProduct: (productId: string, quantity: number) => { success: boolean, message: string };
 }
@@ -116,10 +139,54 @@ const mockProducts: Product[] = [
   }
 ];
 
+const mockCustomers: Customer[] = [
+  {
+    id: '1',
+    code: 'CUST-1001',
+    name: 'Rahul Deshmukh',
+    type: 'individual',
+    email: 'rahul.d@gmail.com',
+    phone: '+91 99887 76655',
+    balance: 150.00,
+    creditLimit: 500.00,
+    status: 'active',
+    lastOrder: '2 days ago',
+    joinDate: 'Jan 2026'
+  },
+  {
+    id: '2',
+    code: 'CUST-1002',
+    name: 'Blue Star Apartments',
+    type: 'business',
+    email: 'info@bluestar.com',
+    phone: '+91 88776 65544',
+    balance: -4500.00,
+    creditLimit: 10000.00,
+    status: 'active',
+    lastOrder: 'Yesterday',
+    joinDate: 'Feb 2026'
+  },
+  {
+    id: '3',
+    code: 'CUST-1003',
+    name: 'Meera Textiles Ltd',
+    type: 'business',
+    email: 'admin@meera.in',
+    phone: '+91 77665 54433',
+    balance: 0.00,
+    creditLimit: 25000.00,
+    status: 'suspended',
+    lastOrder: '3 weeks ago',
+    joinDate: 'March 2026'
+  }
+];
+
 export const useStore = create<AppState>((set, get) => ({
   materials: mockMaterials,
   products: mockProducts,
   ledger: [],
+  customers: mockCustomers,
+
   
   setMaterials: (materials) => set({ materials }),
   
@@ -170,6 +237,20 @@ export const useStore = create<AppState>((set, get) => ({
   
   deleteProduct: (id) => set((state) => ({
     products: state.products.filter(p => p.id !== id)
+  })),
+
+  setCustomers: (customers) => set({ customers }),
+  
+  addCustomer: (customer) => set((state) => ({ 
+    customers: [customer, ...state.customers] 
+  })),
+  
+  updateCustomer: (id, updates) => set((state) => ({
+    customers: state.customers.map(c => c.id === id ? { ...c, ...updates } : c)
+  })),
+  
+  deleteCustomer: (id) => set((state) => ({
+    customers: state.customers.filter(c => c.id !== id)
   })),
 
   assembleProduct: (productId, quantity) => {

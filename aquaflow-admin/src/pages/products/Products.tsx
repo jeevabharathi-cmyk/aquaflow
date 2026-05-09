@@ -40,7 +40,8 @@ import {
   Select,
   InputNumber,
   Row,
-  Col
+  Col,
+  Switch
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useStore, type Product, type BOMItem, type RawMaterial } from '../../store/useStore';
@@ -156,6 +157,11 @@ const ProductsPage = () => {
     }
   };
 
+  const handleStatusToggle = (checked: boolean, productId: string) => {
+    updateProduct(productId, { status: checked ? 'active' : 'inactive' });
+    message.success(`Product status updated to ${checked ? 'Active' : 'Inactive'}`);
+  };
+
   const columns: ColumnsType<Product> = [
     {
       title: 'Product Details',
@@ -223,12 +229,18 @@ const ProductsPage = () => {
     },
     {
       title: 'Status',
-      dataIndex: 'status',
       key: 'status',
-      render: (status) => (
-        <Tag color={status === 'active' ? 'success' : 'default'} className="rounded-full px-3 font-semibold border-none">
-          {status.toUpperCase()}
-        </Tag>
+      render: (_, record) => (
+        <div className="flex items-center gap-2">
+          <Switch 
+            checked={record.status === 'active'} 
+            onChange={(checked) => handleStatusToggle(checked, record.id)}
+            className={record.status === 'active' ? 'bg-green-500' : 'bg-slate-300'}
+          />
+          <Tag color={record.status === 'active' ? 'success' : 'default'} className="rounded-full px-2 border-none font-bold uppercase text-[9px] tracking-widest m-0">
+            {record.status}
+          </Tag>
+        </div>
       ),
     },
     {
