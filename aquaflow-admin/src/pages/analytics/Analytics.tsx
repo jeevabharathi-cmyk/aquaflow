@@ -1,38 +1,18 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Calendar, 
-  Download, 
-  Filter,
-  ArrowUpRight,
-  ArrowDownRight,
-  IndianRupee,
-  ShoppingCart,
-  Users,
-  Package,
-  Activity,
-  ChevronDown
+  BarChart3, TrendingUp, TrendingDown, Calendar, Download, Filter,
+  ArrowUpRight, ArrowDownRight, IndianRupee, ShoppingCart, Users,
+  Package, Activity, ChevronDown
 } from 'lucide-react';
 import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { Card, Button, Select, Space, Row, Col, Statistic, DatePicker, Segmented, Progress } from 'antd';
+import { Card, Button, Select, Space, Row, Col, Statistic, DatePicker, Segmented, Progress, message } from 'antd';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
 
@@ -53,6 +33,84 @@ const categoryData = [
 ];
 
 const AnalyticsPage = () => {
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>([
+    dayjs().subtract(1, 'month'), dayjs()
+  ]);
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const now = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const from = dateRange?.[0]?.format('DD MMM YYYY') || 'N/A';
+    const to = dateRange?.[1]?.format('DD MMM YYYY') || 'N/A';
+
+    // Header
+    doc.setFillColor(30, 41, 59);
+    doc.rect(0, 0, 210, 38, 'F');
+    doc.setTextColor(255); doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+    doc.text('AquaFlow', 14, 17);
+    doc.setFontSize(11); doc.setFont('helvetica', 'normal');
+    doc.text('Performance Analytics Report', 14, 26);
+    doc.setFontSize(9);
+    doc.text(`Period: ${from} — ${to}  |  Generated: ${now}`, 14, 33);
+
+    // KPI Summary
+    doc.setTextColor(30, 41, 59); doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+    doc.text('Key Performance Indicators', 14, 50);
+
+    autoTable(doc, {
+      startY: 55,
+      head: [['Metric', 'Value', 'Trend']],
+      body: [
+        ['Gross Revenue', 'Rs 4.85L', '+14.2%'],
+        ['Total Orders', '1,240', '+8.5%'],
+        ['Customer Acquisition', '84', '+12.1%'],
+        ['Profit Margin', '28.4%', '-1.2%'],
+        ['On-Time Delivery', '96.8%', '+2.1%'],
+        ['Stock Turnover', '12.4x', '+0.8x'],
+        ['Returns Rate', '0.42%', '+0.05%'],
+      ],
+      styles: { fontSize: 9, cellPadding: 4 },
+      headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+    });
+
+    // Revenue Table
+    const y1 = (doc as any).lastAutoTable.finalY + 12;
+    doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+    doc.text('Monthly Revenue Breakdown', 14, y1);
+
+    autoTable(doc, {
+      startY: y1 + 5,
+      head: [['Month', 'Revenue (Rs)', 'Cost (Rs)', 'Profit (Rs)', 'Margin']],
+      body: revenueData.map(r => [
+        r.name,
+        r.revenue.toLocaleString(),
+        r.cost.toLocaleString(),
+        r.profit.toLocaleString(),
+        `${((r.profit / r.revenue) * 100).toFixed(1)}%`
+      ]),
+      styles: { fontSize: 9, cellPadding: 4 },
+      headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+    });
+
+    // Category Breakdown
+    const y2 = (doc as any).lastAutoTable.finalY + 12;
+    doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+    doc.text('Sales by Category', 14, y2);
+
+    autoTable(doc, {
+      startY: y2 + 5,
+      head: [['Category', 'Share (%)']],
+      body: categoryData.map(c => [c.name, `${c.value}%`]),
+      styles: { fontSize: 9, cellPadding: 4 },
+      headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' },
+    });
+
+    doc.save(`AquaFlow_Analytics_${now.replace(/ /g, '_')}.pdf`);
+    message.success('Analytics report downloaded as PDF');
+  };
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -65,8 +123,12 @@ const AnalyticsPage = () => {
           <p className="text-slate-500 mt-1">Deep insights into revenue, growth, and operational efficiency.</p>
         </div>
         <div className="flex items-center gap-3">
-          <RangePicker className="h-10 rounded-lg" />
-          <Button icon={<Download className="w-4 h-4" />} className="h-10 font-bold border-slate-200">Export PDF</Button>
+          <RangePicker 
+            className="h-10 rounded-lg" 
+            value={dateRange}
+            onChange={(dates) => setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)}
+          />
+          <Button icon={<Download className="w-4 h-4" />} className="h-10 font-bold border-slate-200" onClick={handleExportPDF}>Export PDF</Button>
         </div>
       </div>
 
