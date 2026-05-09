@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { 
   Plus, 
   Search, 
@@ -26,7 +28,9 @@ import {
   message,
   Card,
   Tooltip,
-  Badge
+  Badge,
+  Select,
+  Switch
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
@@ -79,9 +83,98 @@ const mockSuppliers: Supplier[] = [
 ];
 
 const SuppliersPage = () => {
+  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
+  const statusValue = Form.useWatch('status', form);
+
+  const handleStatusToggle = (id: string, checked: boolean) => {
+    const newStatus = checked ? 'active' : 'inactive';
+    setSuppliers(prev => prev.map(s => s.id === id ? { ...s, status: newStatus } : s));
+    message.success(`Supplier status updated to ${newStatus}`);
+  };
+
+  const handleAction = (key: string, supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    if (key === 'view') {
+      setIsViewOpen(true);
+    } else if (key === 'edit') {
+      setIsEditMode(true);
+      setIsModalOpen(true);
+      form.setFieldsValue({
+        ...supplier,
+        status: supplier.status === 'active'
+      });
+    } else if (key === 'delete') {
+      Modal.confirm({
+        title: 'Delete Supplier',
+        content: `Are you sure you want to delete ${supplier.name}? This action cannot be undone.`,
+        okText: 'Yes, Delete',
+        okType: 'danger',
+        cancelText: 'No',
+        onOk: () => {
+          setSuppliers(prev => prev.filter(s => s.id !== supplier.id));
+          message.success('Supplier deleted successfully');
+        }
+      });
+    } else if (key === 'po') {
+      message.loading('Initializing Purchase Order...', 1.5).then(() => {
+        message.success(`PO Draft created for ${supplier.name}`);
+      });
+    }
+  };
+
+  const filteredSuppliers = suppliers.filter(supplier => {
+    const matchesSearch = supplier.name.toLowerCase().includes(searchText.toLowerCase()) || 
+                         supplier.code.toLowerCase().includes(searchText.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || supplier.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const exportToPDF = () => {
+    try {
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 0, 210, 40, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.text('AquaFlow Supplier Report', 20, 25);
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 32);
+
+      // Table
+      const tableData = filteredSuppliers.map(s => [
+        s.code,
+        s.name,
+        s.contactPerson,
+        s.email,
+        s.status.toUpperCase(),
+        s.materialsCount.toString()
+      ]);
+
+      autoTable(doc, {
+        head: [['Code', 'Supplier Name', 'Contact', 'Email', 'Status', 'Items']],
+        body: tableData,
+        startY: 50,
+        headStyles: { fillColor: [37, 99, 235] },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        styles: { font: 'helvetica', fontSize: 9 },
+      });
+
+      doc.save(`Suppliers_Report_${new Date().getTime()}.pdf`);
+      message.success('PDF report exported successfully');
+    } catch (error) {
+      console.error('PDF Export Error:', error);
+      message.error('Failed to export PDF. Please try again.');
+    }
+  };
 
   const columns: ColumnsType<Supplier> = [
     {
@@ -137,10 +230,14 @@ const SuppliersPage = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => (
-        <Tag color={status === 'active' ? 'success' : 'default'} className="rounded-full px-3">
-          {status.toUpperCase()}
-        </Tag>
+      render: (status, record) => (
+        <Switch 
+          checked={status === 'active'} 
+          onChange={(checked) => handleStatusToggle(record.id, checked)}
+          checkedChildren="Active"
+          unCheckedChildren="Inactive"
+          style={{ backgroundColor: status === 'active' ? '#22c55e' : '#94a3b8' }}
+        />
       ),
     },
     {
@@ -152,7 +249,7 @@ const SuppliersPage = () => {
     {
       title: '',
       key: 'actions',
-      render: () => (
+      render: (_, record) => (
         <Dropdown menu={{
           items: [
             { key: 'view', label: 'View Details', icon: <ExternalLink className="w-4 h-4" /> },
@@ -160,7 +257,8 @@ const SuppliersPage = () => {
             { key: 'po', label: 'Create PO', icon: <FileText className="w-4 h-4" /> },
             { type: 'divider' },
             { key: 'delete', label: 'Delete', icon: <Trash2 className="w-4 h-4" />, danger: true },
-          ]
+          ],
+          onClick: ({ key }) => handleAction(key, record)
         }} trigger={['click']}>
           <Button type="text" icon={<MoreHorizontal className="w-5 h-5" />} className="text-slate-400 hover:text-slate-600" />
         </Dropdown>
@@ -170,9 +268,30 @@ const SuppliersPage = () => {
 
   const handleAddSupplier = () => {
     form.validateFields().then(values => {
-      console.log('Success:', values);
-      message.success('Supplier added successfully');
+      const statusValue = values.status === true || values.status === undefined ? 'active' : 'inactive';
+      const processedValues = { ...values, status: statusValue };
+
+      if (isEditMode && selectedSupplier) {
+        setSuppliers(prev => prev.map(s => s.id === selectedSupplier.id ? { ...s, ...processedValues } : s));
+        message.success('Supplier updated successfully');
+      } else {
+        const newSupplier: Supplier = {
+          id: (suppliers.length + 1).toString(),
+          code: `SUP-${(suppliers.length + 1).toString().padStart(3, '0')}`,
+          name: values.name,
+          contactPerson: values.contactPerson,
+          email: values.email,
+          phone: values.phone,
+          status: statusValue,
+          materialsCount: 0,
+          lastOrderDate: 'New'
+        };
+        setSuppliers([newSupplier, ...suppliers]);
+        message.success('Supplier added successfully');
+      }
       setIsModalOpen(false);
+      setIsEditMode(false);
+      setSelectedSupplier(null);
       form.resetFields();
     });
   };
@@ -192,7 +311,12 @@ const SuppliersPage = () => {
           type="primary" 
           icon={<Plus className="w-4 h-4" />} 
           className="h-10 px-6 bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setIsEditMode(false);
+            setSelectedSupplier(null);
+            form.resetFields();
+            setIsModalOpen(true);
+          }}
         >
           Add New Supplier
         </Button>
@@ -211,8 +335,28 @@ const SuppliersPage = () => {
             />
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button icon={<Filter className="w-4 h-4" />} className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-slate-200 font-semibold text-slate-600">Status</Button>
-            <Button icon={<Download className="w-4 h-4" />} className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-slate-200 font-semibold text-slate-600">Export</Button>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: 'all', label: 'All Status' },
+                  { key: 'active', label: 'Active Only' },
+                  { key: 'inactive', label: 'Inactive Only' },
+                ],
+                onClick: ({ key }) => setStatusFilter(key as any)
+              }}
+              trigger={['click']}
+            >
+              <Button icon={<Filter className="w-4 h-4" />} className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-slate-200 font-semibold text-slate-600">
+                {statusFilter === 'all' ? 'Status' : statusFilter.toUpperCase()}
+              </Button>
+            </Dropdown>
+            <Button 
+              icon={<Download className="w-4 h-4" />} 
+              className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-slate-200 font-semibold text-slate-600"
+              onClick={exportToPDF}
+            >
+              Export
+            </Button>
           </div>
         </div>
       </Card>
@@ -221,7 +365,7 @@ const SuppliersPage = () => {
       <Card className="shadow-sm border-slate-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
         <Table 
           columns={columns} 
-          dataSource={mockSuppliers} 
+          dataSource={filteredSuppliers} 
           rowKey="id"
           pagination={{ pageSize: 10 }}
           className="aquaflow-table"
@@ -229,20 +373,24 @@ const SuppliersPage = () => {
         />
       </Card>
 
-      {/* Add Supplier Modal */}
+      {/* Add/Edit Supplier Modal */}
       <Modal
         title={
           <div className="pb-4 border-b border-slate-100 flex items-center gap-2">
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <Plus className="w-5 h-5" />
+              {isEditMode ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
             </div>
-            <span className="text-lg font-bold">Add New Supplier</span>
+            <span className="text-lg font-bold">{isEditMode ? 'Edit Supplier' : 'Add New Supplier'}</span>
           </div>
         }
         open={isModalOpen}
         onOk={handleAddSupplier}
-        onCancel={() => setIsModalOpen(false)}
-        okText="Create Supplier"
+        onCancel={() => {
+          setIsModalOpen(false);
+          setIsEditMode(false);
+          form.resetFields();
+        }}
+        okText={isEditMode ? "Save Changes" : "Create Supplier"}
         cancelText="Cancel"
         width={650}
         okButtonProps={{ className: 'bg-blue-600' }}
@@ -251,7 +399,7 @@ const SuppliersPage = () => {
           form={form}
           layout="vertical"
           className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-4"
-          initialValues={{ status: 'active' }}
+          initialValues={{ status: true }}
         >
           <Form.Item
             name="name"
@@ -272,9 +420,15 @@ const SuppliersPage = () => {
 
           <Form.Item
             name="status"
-            label="Status"
+            label="Active Status"
+            valuePropName="checked"
           >
-            <Tag color="success">ACTIVE</Tag>
+            <Switch 
+              checkedChildren="Active" 
+              unCheckedChildren="Inactive"
+              className="bg-slate-200"
+              style={{ backgroundColor: statusValue === false ? '#94a3b8' : '#22c55e' }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -295,12 +449,107 @@ const SuppliersPage = () => {
 
           <Form.Item
             name="address"
-            label="Office Address"
+            label="Customer Address"
             className="md:col-span-2"
           >
             <Input.TextArea rows={3} placeholder="Full address..." />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* View Details Modal */}
+      <Modal
+        title={null}
+        footer={null}
+        open={isViewOpen}
+        onCancel={() => setIsViewOpen(false)}
+        width={500}
+        centered
+        styles={{ body: { padding: 0 } }}
+        className="rounded-2xl overflow-hidden"
+      >
+        <div className="bg-slate-900 p-6 text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-2xl font-black border border-white/10">
+              {selectedSupplier?.name.charAt(0)}
+            </div>
+            <div>
+              <Tag color="success" className="mb-1 border-none font-bold uppercase tracking-widest text-[10px]">
+                {selectedSupplier?.status}
+              </Tag>
+              <h2 className="text-xl font-black">{selectedSupplier?.name}</h2>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{selectedSupplier?.code}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTACT PERSON</p>
+              <p className="font-bold text-slate-900">{selectedSupplier?.contactPerson}</p>
+            </div>
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MATERIALS SUPPLIED</p>
+              <p className="font-bold text-slate-900">{selectedSupplier?.materialsCount} Items</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Mail className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">EMAIL ADDRESS</p>
+                <p className="text-sm font-bold text-slate-800">{selectedSupplier?.email}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <Phone className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">PHONE NUMBER</p>
+                <p className="text-sm font-bold text-slate-800">{selectedSupplier?.phone}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <MapPin className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">LOCATION</p>
+                <p className="text-sm font-bold text-slate-800 leading-relaxed">
+                  Building 7, Sector 12, Baner, Pune, Maharashtra 411045
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-100 flex gap-2">
+            <Button 
+              type="primary" 
+              icon={<Edit className="w-4 h-4" />} 
+              className="flex-1 bg-blue-600 font-bold h-10 rounded-lg"
+              onClick={() => {
+                setIsViewOpen(false);
+                handleAction('edit', selectedSupplier!);
+              }}
+            >
+              Edit Info
+            </Button>
+            <Button 
+              icon={<FileText className="w-4 h-4" />} 
+              className="flex-1 font-bold h-10 rounded-lg text-slate-600"
+              onClick={() => handleAction('po', selectedSupplier!)}
+            >
+              Create PO
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
