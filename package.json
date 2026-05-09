@@ -4,6 +4,8 @@
   "scripts": {
     "dev": "npm run dev --prefix aquaflow-admin",
     "build": "npm run build --prefix aquaflow-admin",
+    "build:prod": "npm run build --prefix aquaflow-admin",
+    "deploy": "npm run build:prod && npx netlify deploy --prod --dir=aquaflow-admin/dist",
     "lint": "npm run lint --prefix aquaflow-admin",
     "preview": "npm run preview --prefix aquaflow-admin",
     "test": "npm run test --prefix aquaflow-admin"
