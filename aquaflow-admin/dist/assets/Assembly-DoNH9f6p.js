@@ -1,0 +1,2 @@
+import{D as s}from"./index-BC2-EzHv.js";const t=()=>s.jsxs("div",{children:[s.jsx("h1",{className:"text-2xl font-bold text-slate-900 mb-6",children:"Assembly"}),s.jsx("div",{className:"bg-white rounded-xl p-6 shadow-sm border border-slate-200",children:s.jsx("p",{className:"text-slate-500",children:"Content for assembly page coming soon..."})})]});export{t as default};
+//# sourceMappingURL=Assembly-DoNH9f6p.js.map

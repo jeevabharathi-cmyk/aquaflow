@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build --prefix aquaflow-admin"
+  publish = "aquaflow-admin/dist"
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[headers]
+  [[headers.values]]
+    Cache-Control = "public, max-age=0, must-revalidate"
