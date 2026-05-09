@@ -34,7 +34,7 @@ const menuItems = [
   { icon: Package, label: 'Products', path: '/products' },
   { icon: Factory, label: 'BOM & Assembly', path: '/assembly' },
   { icon: Users, label: 'Customers', path: '/customers' },
-  { icon: Truck, label: 'Fleet & Dispatch', path: '/dispatch' },
+  { icon: Truck, label: 'Fleet & Dispatch', path: '/map' },
   { icon: CreditCard, label: 'Payments', path: '/payments' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
   { icon: Settings, label: 'Settings', path: '/settings' },

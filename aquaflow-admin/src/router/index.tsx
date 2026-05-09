@@ -53,7 +53,7 @@ export const AppRouter = () => {
         <Route path="/products" element={<Products />} />
         <Route path="/assembly" element={<Assembly />} />
         <Route path="/customers" element={<Customers />} />
-        <Route path="/dispatch" element={<Dispatch />} />
+        <Route path="/map" element={<Dispatch />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />

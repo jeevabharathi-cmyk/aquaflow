@@ -66,3 +66,71 @@ body {
     max-width: none !important;
   }
 }
+
+/* Premium Table Styling */
+.aquaflow-table .ant-table {
+  background: transparent !important;
+}
+
+.aquaflow-table .ant-table-thead > tr > th {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.aquaflow-table .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f8fafc !important;
+  transition: all 0.2s ease !important;
+}
+
+.aquaflow-table .ant-table-tbody > tr:hover > td {
+  background: #f1f5f9 !important;
+}
+
+/* Ant Design Global Overrides */
+.ant-btn-primary {
+  background: #2563eb !important;
+}
+
+.ant-btn-primary:hover {
+  background: #1d4ed8 !important;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2) !important;
+}
+
+.ant-modal-content {
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.ant-modal-header {
+  padding: 24px 24px 0 24px !important;
+  border-bottom: none !important;
+}
+
+.ant-modal-body {
+  padding: 24px !important;
+}
+
+.ant-tabs-nav::before {
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.ant-tabs-tab {
+  padding: 12px 0 !important;
+}
+
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #2563eb !important;
+}
+
+.ant-tabs-ink-bar {
+  background: #2563eb !important;
+  height: 3px !important;
+  border-radius: 3px 3px 0 0 !important;
+}
+
