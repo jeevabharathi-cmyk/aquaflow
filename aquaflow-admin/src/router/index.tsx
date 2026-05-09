@@ -2,6 +2,9 @@ import * as React from 'react';
 import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AdminLayout } from '@/components/common/AdminLayout';
+import LoginPage from '@/pages/auth/Login';
+import RegisterPage from '@/pages/auth/Register';
+
 
 // Lazy load pages
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
@@ -35,10 +38,13 @@ const LayoutWrapper = () => (
 export const AppRouter = () => {
   return (
     <Routes>
-      <Route path="/login" element={<div className="flex h-screen items-center justify-center">Login Page Placeholder</div>} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      
       
       {/* Admin Protected Routes */}
       <Route element={<LayoutWrapper />}>
+
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />

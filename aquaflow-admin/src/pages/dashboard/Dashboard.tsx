@@ -27,7 +27,7 @@ import { Card, Button, Table, Tag, Space, Dropdown, message, DatePicker, Modal, 
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import type { ColumnsType } from 'antd/es/table';
+import type { TableProps, MenuProps } from 'antd';
 
 const data = [
   { name: 'Mon', revenue: 4000, orders: 240 },
@@ -87,12 +87,12 @@ interface OrderRecord {
   date: string;
 }
 
-const columns: ColumnsType<OrderRecord> = [
+const columns: TableProps<OrderRecord>['columns'] = [
   {
     title: 'Order ID',
     dataIndex: 'orderId',
     key: 'orderId',
-    render: (text) => <span className="font-medium text-blue-600">#{text}</span>,
+    render: (text: string) => <span className="font-medium text-blue-600">#{text}</span>,
   },
   {
     title: 'Customer',
@@ -103,13 +103,13 @@ const columns: ColumnsType<OrderRecord> = [
     title: 'Amount',
     dataIndex: 'amount',
     key: 'amount',
-    render: (text) => <span className="font-semibold">₹{text}</span>,
+    render: (text: string) => <span className="font-semibold">₹{text}</span>,
   },
   {
     title: 'Status',
     dataIndex: 'status',
     key: 'status',
-    render: (status) => {
+    render: (status: string) => {
       let color = 'default';
       if (status === 'delivered') color = 'success';
       if (status === 'processing') color = 'processing';
@@ -198,12 +198,12 @@ const DashboardPage = () => {
     }
   };
 
-  const filterMenu = {
+  const filterMenu: MenuProps = {
     items: [
       { key: '1', label: <Checkbox>Active Only</Checkbox> },
       { key: '2', label: <Checkbox>Pending Only</Checkbox> },
       { type: 'divider' },
-      { key: '3', label: 'Apply Filters', type: 'primary' },
+      { key: '3', label: <span className="text-blue-600 font-bold">Apply Filters</span> },
     ]
   };
 

@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
+import { supabase } from '@/lib/supabase';
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -40,7 +42,14 @@ const menuItems = [
 ];
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+  const [user, setUser] = React.useState<any>(null);
   const location = useLocation();
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
 
   return (
     <aside className={cn(
@@ -95,11 +104,11 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
       <div className="p-4 border-t border-slate-800 shrink-0">
         <div className="bg-slate-800/50 rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:bg-slate-800 transition-colors group">
           <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold shadow-sm group-hover:scale-105 transition-transform">
-            JD
+            {user?.email?.substring(0, 2).toUpperCase() || 'AD'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">John Doe</p>
-            <p className="text-xs text-slate-400 truncate">Super Admin</p>
+            <p className="text-sm font-semibold text-white truncate">{user?.email?.split('@')[0] || 'Admin User'}</p>
+            <p className="text-xs text-slate-400 truncate">Administrator</p>
           </div>
         </div>
       </div>

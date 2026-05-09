@@ -1,29 +1,84 @@
 import * as React from 'react';
 import { Bell, Search, LogOut, User, Menu } from 'lucide-react';
-import { Dropdown } from 'antd';
+import { Dropdown, message } from 'antd';
 import type { MenuProps } from 'antd';
+import { supabase } from '@/lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export const Header = ({ onMenuClick }: HeaderProps) => {
+  const [user, setUser] = React.useState<any>(null);
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      message.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      message.error('Failed to logout');
+    }
+  };
+
   const userMenuItems: MenuProps['items'] = [
-    {
+    user && {
       key: 'profile',
       label: 'My Profile',
       icon: <User className="w-4 h-4" />,
     },
-    {
+    user && {
       type: 'divider',
     },
     {
-      key: 'logout',
-      label: 'Logout',
-      icon: <LogOut className="w-4 h-4" />,
-      danger: true,
+      key: user ? 'logout' : 'login',
+      label: user ? 'Logout' : 'Sign In',
+      icon: user ? <LogOut className="w-4 h-4" /> : <User className="w-4 h-4" />,
+      danger: !!user,
+      onClick: user ? handleLogout : () => navigate('/login'),
+    },
+  ].filter(Boolean) as MenuProps['items'];
+
+  const notificationItems: MenuProps['items'] = [
+    { 
+      key: '1', 
+      label: (
+        <div className="flex flex-col">
+          <span className="font-medium text-slate-900">New order received (#ORD-005)</span>
+          <span className="text-xs text-slate-500">2m ago</span>
+        </div>
+      )
+    },
+    { 
+      key: '2', 
+      label: (
+        <div className="flex flex-col">
+          <span className="font-medium text-slate-900">Supplier Crystal Clear updated status</span>
+          <span className="text-xs text-slate-500">1h ago</span>
+        </div>
+      )
+    },
+    { 
+      key: '3', 
+      label: (
+        <div className="flex flex-col">
+          <span className="font-medium text-red-600">Low stock alert: PET Bottles</span>
+          <span className="text-xs text-slate-500">3h ago</span>
+        </div>
+      ),
+      danger: true 
     },
   ];
+
+  const initials = user?.email?.substring(0, 2).toUpperCase() || 'AD';
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-3 sm:px-6 sticky top-0 z-40">
@@ -48,13 +103,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
 
       <div className="flex items-center gap-2">
         <Dropdown
-          menu={{
-            items: [
-              { key: '1', label: 'New order received (#ORD-005)', extra: '2m ago' },
-              { key: '2', label: 'Supplier Crystal Clear updated status', extra: '1h ago' },
-              { key: '3', label: 'Low stock alert: PET Bottles', extra: '3h ago', danger: true },
-            ]
-          }}
+          menu={{ items: notificationItems }}
           placement="bottomRight"
           trigger={['click']}
         >
@@ -69,11 +118,11 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
           <button className="flex items-center gap-2 hover:bg-slate-50 p-1 pr-3 rounded-xl transition-colors">
             <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-              JD
+              {initials}
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-sm font-semibold text-slate-900 leading-none">John Doe</p>
-              <p className="text-[11px] text-slate-500 font-medium">Super Admin</p>
+              <p className="text-sm font-semibold text-slate-900 leading-none">{user?.email?.split('@')[0] || 'Admin User'}</p>
+              <p className="text-[11px] text-slate-500 font-medium">Administrator</p>
             </div>
           </button>
         </Dropdown>
