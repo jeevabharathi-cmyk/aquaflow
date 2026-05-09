@@ -9,7 +9,8 @@ import {
   AlertCircle,
   Search,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  Plus
 } from 'lucide-react';
 import { Button, Input, Tag, Card, Badge, Avatar, Tooltip } from 'antd';
 
