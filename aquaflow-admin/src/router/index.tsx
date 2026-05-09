@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/common/AdminLayout';
 import LoginPage from '@/pages/auth/Login';
 import RegisterPage from '@/pages/auth/Register';
 
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 // Lazy load pages
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
@@ -43,8 +44,11 @@ export const AppRouter = () => {
       
       
       {/* Admin Protected Routes */}
-      <Route element={<LayoutWrapper />}>
-
+      <Route element={
+        <AuthGuard>
+          <LayoutWrapper />
+        </AuthGuard>
+      }>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orders" element={<Orders />} />

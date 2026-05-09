@@ -13,11 +13,19 @@ export const LoginPage = () => {
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
 
+  React.useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate(from, { replace: true });
+      }
+    });
+  }, [navigate, from]);
+
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: values.email,
+        email: values.email.trim(),
         password: values.password,
       });
 
@@ -105,13 +113,6 @@ export const LoginPage = () => {
                   className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 border-none text-base font-black shadow-lg shadow-blue-100 tracking-wide transition-all hover:scale-[1.02] active:scale-95"
                 >
                   SIGN IN
-                </Button>
-                <Button
-                  type="default"
-                  onClick={() => navigate('/dashboard')}
-                  className="w-full h-12 rounded-xl border-2 border-slate-200 text-slate-600 font-bold hover:border-blue-500 hover:text-blue-500 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
-                >
-                  CONTINUE AS GUEST
                 </Button>
               </Space>
             </Form.Item>

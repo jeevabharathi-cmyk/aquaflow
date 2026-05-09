@@ -3,9 +3,9 @@ import { useState } from 'react';
 import {
   Settings, User, Lock, Bell, Shield, Database, Globe, Smartphone,
   Mail, CreditCard, Building2, ChevronRight, Save, Upload, Trash2,
-  Plus, Eye, EyeOff, Check, X, Key
+  Plus, Eye, EyeOff, Check, X, Key, Search, MoreHorizontal
 } from 'lucide-react';
-import { Card, Button, Input, Switch, Divider, Avatar, Tag, Modal, Form, Select, message, Descriptions } from 'antd';
+import { Card, Button, Input, Switch, Divider, Avatar, Tag, Modal, Form, Select, message, Descriptions, Badge, Dropdown } from 'antd';
 
 const tabs = [
   { label: 'General', icon: Settings },
