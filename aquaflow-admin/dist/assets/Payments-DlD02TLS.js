@@ -1,0 +1,2 @@
+import{C as e}from"./index-CllFnjBN.js";const t=()=>e.jsxs("div",{children:[e.jsx("h1",{className:"text-2xl font-bold text-slate-900 mb-6",children:"Payments"}),e.jsx("div",{className:"bg-white rounded-xl p-6 shadow-sm border border-slate-200",children:e.jsx("p",{className:"text-slate-500",children:"Content for payments page coming soon..."})})]});export{t as default};
+//# sourceMappingURL=Payments-DlD02TLS.js.map
