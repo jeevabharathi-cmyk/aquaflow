@@ -47,82 +47,10 @@ import {
 } from 'recharts';
 import type { ColumnsType } from 'antd/es/table';
 
-interface RawMaterial {
-  id: string;
-  sku: string;
-  name: string;
-  type: 'bottle' | 'cap' | 'label' | 'packaging' | 'other';
-  unit: string;
-  stock: number;
-  minLevel: number;
-  cost: number;
-  lastUpdated: string;
-}
-
-const mockMaterials: RawMaterial[] = [
-  {
-    id: '1',
-    sku: 'BOT-1L-CLR',
-    name: '1L Clear PET Bottle',
-    type: 'bottle',
-    unit: 'pcs',
-    stock: 2500,
-    minLevel: 1000,
-    cost: 4.50,
-    lastUpdated: '2 hours ago'
-  },
-  {
-    id: '2',
-    sku: 'CAP-STD-RED',
-    name: 'Standard Red Cap',
-    type: 'cap',
-    unit: 'pcs',
-    stock: 800,
-    minLevel: 1500,
-    cost: 0.80,
-    lastUpdated: '5 hours ago'
-  },
-  {
-    id: '3',
-    sku: 'LBL-1L-PREM',
-    name: '1L Premium Label',
-    type: 'label',
-    unit: 'pcs',
-    stock: 5000,
-    minLevel: 2000,
-    cost: 1.20,
-    lastUpdated: '1 day ago'
-  },
-  {
-    id: '4',
-    sku: 'BOX-12-STD',
-    name: '12-Pack Outer Box',
-    type: 'packaging',
-    unit: 'pcs',
-    stock: 150,
-    minLevel: 200,
-    cost: 12.00,
-    lastUpdated: '3 hours ago'
-  }
-];
-
-interface LedgerEntry {
-  id: string;
-  materialId: string;
-  materialName: string;
-  type: 'IN' | 'OUT';
-  quantity: number;
-  date: string;
-  user: string;
-  reason: string;
-}
+import { useStore, type RawMaterial, type LedgerEntry } from '../../store/useStore';
 
 const InventoryPage = () => {
-  const [materials, setMaterials] = useState<RawMaterial[]>(mockMaterials);
-  const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([
-    { id: '1', materialId: '1', materialName: '1L Clear PET Bottle', type: 'IN', quantity: 1000, date: '2026-05-09 10:00', user: 'Admin User', reason: 'Purchase Order' },
-    { id: '2', materialId: '2', materialName: 'Standard Red Cap', type: 'OUT', quantity: 200, date: '2026-05-09 11:30', user: 'Production Mgr', reason: 'Assembly Line' }
-  ]);
+  const { materials, ledger, addMaterial, updateMaterial, deleteMaterial, updateMaterialStock } = useStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLedgerOpen, setIsLedgerOpen] = useState(false);
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
@@ -158,7 +86,7 @@ const InventoryPage = () => {
     };
 
     if (isEditMode && selectedMaterial) {
-      setMaterials(prev => prev.map(m => m.id === selectedMaterial.id ? { ...m, ...processedValues } : m));
+      updateMaterial(selectedMaterial.id, processedValues);
       message.success('Material updated successfully');
     } else {
       const newMaterial: RawMaterial = {
@@ -172,21 +100,11 @@ const InventoryPage = () => {
         cost: processedValues.cost,
         lastUpdated: 'Just now'
       };
-      setMaterials([newMaterial, ...materials]);
+      addMaterial(newMaterial);
       
       // Add initial stock to ledger if provided
-      if (values.initialStock > 0) {
-        const newLedgerEntry: LedgerEntry = {
-          id: Math.random().toString(36).substr(2, 9),
-          materialId: newMaterial.id,
-          materialName: newMaterial.name,
-          type: 'IN',
-          quantity: values.initialStock,
-          date: new Date().toLocaleString(),
-          user: 'Admin User',
-          reason: 'Initial Stock'
-        };
-        setLedgerEntries([newLedgerEntry, ...ledgerEntries]);
+      if (processedValues.stock > 0) {
+        updateMaterialStock(newMaterial.id, processedValues.stock, 'IN', 'Initial Stock');
       }
       message.success('Material added successfully');
     }
@@ -202,27 +120,8 @@ const InventoryPage = () => {
     const quantity = Number(values.quantity);
     const type = values.type; // 'IN' or 'OUT'
     
-    setMaterials(prev => prev.map(m => {
-      if (m.id === selectedMaterial.id) {
-        const newStock = type === 'IN' ? m.stock + quantity : m.stock - quantity;
-        return { ...m, stock: newStock, lastUpdated: 'Just now' };
-      }
-      return m;
-    }));
-
-    const newEntry: LedgerEntry = {
-      id: Math.random().toString(36).substr(2, 9),
-      materialId: selectedMaterial.id,
-      materialName: selectedMaterial.name,
-      type: type,
-      quantity: quantity,
-      date: new Date().toLocaleString(),
-      user: 'Admin User',
-      reason: values.reason || 'Manual Update'
-    };
-
-    setLedgerEntries([newEntry, ...ledgerEntries]);
-    message.success(`Stock ${type === 'IN' ? 'added' : 'removed'} successfully`);
+    updateMaterialStock(selectedMaterial.id, quantity, type, values.reason || 'Manual Update');
+    
     setIsAddStockOpen(false);
     setSelectedMaterial(null);
     stockForm.resetFields();
@@ -245,8 +144,7 @@ const InventoryPage = () => {
         okText: 'Delete',
         okType: 'danger',
         onOk: () => {
-          setMaterials(prev => prev.filter(m => m.id !== material.id));
-          setLedgerEntries(prev => prev.filter(e => e.materialId !== material.id));
+          deleteMaterial(material.id);
           message.success('Material removed');
         }
       });
@@ -559,7 +457,7 @@ const InventoryPage = () => {
           />
         </div>
         <Table 
-          dataSource={ledgerEntries.filter(entry => {
+          dataSource={ledger.filter(entry => {
             if (!ledgerDateRange) return true;
             const entryDate = new Date(entry.date);
             return entryDate >= ledgerDateRange[0].toDate() && entryDate <= ledgerDateRange[1].toDate();
